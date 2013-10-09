@@ -28,13 +28,15 @@ Endpoint to create and retrieve notifications
         HTTP/1.1 201 Created
         Location: /alert/{uuid}
 
+    :jsonparam string message: the message of the alert
+
     :statuscode 201: :http:statuscode:`201`: alert created
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
 
 .. http:post:: /push
 
-    Request the alert to be pushed to registered devices
+    Request an alert to be pushed to registered devices
     
     Requires authentication
     
@@ -56,6 +58,9 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
     
         HTTP/1.1 202 Accepted
+        
+    :jsonparam string alert: unique identifier of the alert
+    :jsonparam string message: message of the push alert
         
     :statuscode 202: :http:statuscode:`202`: push request queued
     :statuscode 400: :http:statuscode:`400`
