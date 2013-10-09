@@ -6,11 +6,12 @@
 Welcome to Moxie Notifications's documentation!
 ===============================================
 
-Contents:
+HTTP API
+--------
 
 .. toctree::
-   :maxdepth: 2
 
+    http_api/endpoint
 
 
 Indices and tables
