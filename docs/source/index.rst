@@ -13,6 +13,13 @@ HTTP API
 
     http_api/endpoint
 
+Developer
+---------
+
+.. toctree::
+
+    developer/models
+
 
 Indices and tables
 ==================
