@@ -28,9 +28,9 @@ Endpoint to create and retrieve notifications
         HTTP/1.1 201 Created
         Location: /alert/{uuid}
 
-    :statuscode 201: alert created
-    :statuscode 400: bad request
-    :statuscode 401: authentication error
+    :statuscode 201: :http:statuscode:`201`: alert created
+    :statuscode 400: :http:statuscode:`400`
+    :statuscode 401: :http:statuscode:`401`
 
 .. http:post:: /push
 
@@ -57,9 +57,9 @@ Endpoint to create and retrieve notifications
     
         HTTP/1.1 202 Accepted
         
-    :statuscode 202: push request queued
-    :statuscode 400: bad request
-    :statuscode 401: authentication error
+    :statuscode 202: :http:statuscode:`202`: push request queued
+    :statuscode 400: :http:statuscode:`400`
+    :statuscode 401: :http:statuscode:`401`
 
 .. http:post:: /alert/(string:uuid)
 
@@ -89,10 +89,10 @@ Endpoint to create and retrieve notifications
     :param uuid: unique identifier of the alert
     :type uuid: string
 
-    :statuscode 200: update applied correctly
-    :statuscode 400: bad request
-    :statuscode 401: authentication error
-    :statuscode 404: alert not found
+    :statuscode 200: :http:statuscode:`200`: update applied correctly
+    :statuscode 400: :http:statuscode:`400`
+    :statuscode 401: :http:statuscode:`401`
+    :statuscode 404: :http:statuscode:`404`: alert not found
 
 .. http:post:: /alert/(string:uuid)/followup
 
@@ -122,10 +122,10 @@ Endpoint to create and retrieve notifications
     :param uuid: unique identifier of the alert
     :type uuid: string
 
-    :statuscode 201: followup created
-    :statuscode 400: bad request
-    :statuscode 401: authentication error
-    :statuscode 404: alert not found
+    :statuscode 201: :http:statuscode:`201`: followup created
+    :statuscode 400: :http:statuscode:`400`
+    :statuscode 401: :http:statuscode:`401`
+    :statuscode 404: :http:statuscode:`404`: alert not found
 
 .. http:post:: /alert/(string:uuid)/followup/(string:id)
 
@@ -157,10 +157,10 @@ Endpoint to create and retrieve notifications
     :param id: identifier of the followup
     :type id: string
 
-    :statuscode 200: update applied correctly
-    :statuscode 400: bad request
-    :statuscode 401: authentication error
-    :statuscode 404: alert not found or followup not found
+    :statuscode 200: :http:statuscode:`200`: update applied correctly
+    :statuscode 400: :http:statuscode:`400`
+    :statuscode 401: :http:statuscode:`401`
+    :statuscode 404: :http:statuscode:`404`: alert not found or followup not found
 
 .. http:delete:: /alert/(string:uuid)
 
@@ -184,9 +184,9 @@ Endpoint to create and retrieve notifications
     :param uuid: unique identifier of the alert
     :type uuid: string
 
-    :statuscode 200: deleted
-    :statuscode 401: authentication error
-    :statuscode 404: non existing alert
+    :statuscode 200: :http:statuscode:`200`: alert deleted
+    :statuscode 401: :http:statuscode:`401`
+    :statuscode 404: :http:statuscode:`404`: alert not found
 
 .. http:delete:: /alert/(string:uuid)/followup/(string:id)
 
@@ -212,9 +212,9 @@ Endpoint to create and retrieve notifications
     :param id: identifier of the follow up
     :type id: string
 
-    :statuscode 200: deleted
-    :statuscode 401: authentication error
-    :statuscode 404: alert not found or follow up not found
+    :statuscode 200: :http:statuscode:`200`: follow up deleted
+    :statuscode 401: :http:statuscode:`401`
+    :statuscode 404: :http:statuscode:`404`: alert not found or follow up not found
 
 .. http:get:: /alerts
 
@@ -256,7 +256,7 @@ Endpoint to create and retrieve notifications
 
     :query history: display passed alerts (defaults to false)
 
-    :statuscode 200: response ok
+    :statuscode 200: :http:statuscode:`200`
 
 .. http:get:: /alert/(string:uuid)
 
@@ -292,6 +292,6 @@ Endpoint to create and retrieve notifications
             ]
         }
         
-    :statuscode 200: response ok
-    :statuscode 404: alert not found
+    :statuscode 200: :http:statuscode:`200`
+    :statuscode 404: :http:statuscode:`404`: alert not found
     
