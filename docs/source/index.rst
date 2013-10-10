@@ -12,6 +12,7 @@ HTTP API
 .. toctree::
 
     http_api/endpoint
+    http_api/scenario
 
 Developer
 ---------
