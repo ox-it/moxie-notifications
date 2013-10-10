@@ -29,6 +29,8 @@ Endpoint to create and retrieve notifications
         Location: /alert/{uuid}
 
     :jsonparam string message: the message of the alert
+    :jsonparam date initialDate: (optional) start date of the alert
+    :jsonparam date displayUntil: (optional) end date of the alert
 
     :statuscode 201: :http:statuscode:`201`: alert created
     :statuscode 400: :http:statuscode:`400`
@@ -94,6 +96,10 @@ Endpoint to create and retrieve notifications
     :param uuid: unique identifier of the alert
     :type uuid: string
 
+    :jsonparam string message: the message of the alert
+    :jsonparam date initialDate: (optional) start date of the alert
+    :jsonparam date displayUntil: (optional) end date of the alert
+
     :statuscode 200: :http:statuscode:`200`: update applied correctly
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
@@ -126,6 +132,9 @@ Endpoint to create and retrieve notifications
 
     :param uuid: unique identifier of the alert
     :type uuid: string
+
+    :jsonparam string message: the message of the follow up
+    :jsonparam date timestamp: (optional) date of the follow up
 
     :statuscode 201: :http:statuscode:`201`: followup created
     :statuscode 400: :http:statuscode:`400`
@@ -161,6 +170,9 @@ Endpoint to create and retrieve notifications
     :type uuid: string
     :param id: identifier of the followup
     :type id: string
+
+    :jsonparam string message: the message of the follow up
+    :jsonparam date initialDate: (optional) date of the follow up
 
     :statuscode 200: :http:statuscode:`200`: update applied correctly
     :statuscode 400: :http:statuscode:`400`
