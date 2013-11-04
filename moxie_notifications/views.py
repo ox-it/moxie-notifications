@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
@@ -19,13 +20,12 @@ class AlertView(ServiceView):
         return result
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, response):
-        if response:
-            if type(response) is tuple:
-                # (json, status, headers (Location)
-                return response
-            else:
-                return jsonify({'status': 'success'}), 200
+    def as_json(self, ident):
+        if ident:
+            response = jsonify({'status': 'created'})
+            response.headers.add('Location', url_for('notifications.alert_details', ident=ident))
+            response.status_code = 201
+            return response
         else:
             return jsonify({'status': 'error'}), 500
 
