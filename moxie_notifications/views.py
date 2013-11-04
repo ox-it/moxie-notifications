@@ -5,7 +5,8 @@ from moxie.core.exceptions import NotFound, BadRequest
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
 from moxie_notifications.representations import HALAlertRepresentation
-from .services import NotificationsService
+from .services import NotificationsService, ANDROID, iOS
+from .domain import Alert, PushAlert
 
 
 class AlertView(ServiceView):
@@ -102,3 +103,39 @@ class AlertDetailsView(ServiceView):
 class FollowUpDetailsView(ServiceView):
 
     methods = ['OPTIONS', 'GET']
+
+
+class Register(ServiceView):
+    methods = ['POST', 'OPTIONS']
+
+    platform = None
+    post_data_key = None
+
+    def handle_request(self):
+        notification_service = NotificationsService.from_context()
+        data = request.get_json()
+        try:
+            token = data[self.post_data_key]
+        except KeyError:
+            return (jsonify(error="Expected key: %s" % self.post_data_key),
+                    400, {})
+        success = notification_service.register(token, self.platform)
+        response = jsonify(success=success)
+        if success:
+            return (response, 201, {})
+        else:
+            return (response, 500, {})
+
+    @accepts(HAL_JSON, JSON)
+    def as_hal_json(self, response):
+        return response
+
+
+class RegisterGCM(Register):
+    platform = ANDROID
+    post_data_key = 'registration_id'
+
+
+class RegisterAPNS(Register):
+    platform = iOS
+    post_data_key = 'device_token'

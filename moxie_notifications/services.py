@@ -1,13 +1,19 @@
 import uuid
 from flask.json import loads, dumps
 
-from moxie.core.service import Service
+from moxie.core.service import ProviderService
 from moxie.core.kv import kv_store
 
+ANDROID = 'android'
+iOS = 'iOS'
 
-class NotificationsService(Service):
 
+class NotificationsService(ProviderService):
     KV_PREFIX = 'notification_'
+
+    def register(self, token, platform):
+        provider = self.get_provider(platform)
+        return provider.add_token(token)
 
     def get_alert_by_id(self, ident):
         json = kv_store.get(self.KV_PREFIX + ident)
