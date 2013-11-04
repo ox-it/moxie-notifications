@@ -3,11 +3,21 @@ from flask.helpers import make_response
 
 from moxie.core.representations import HALRepresentation
 
+from .views import AlertView, PushView, AlertsView, AlertDetailsView
+
 
 def create_blueprint(blueprint_name, conf):
     notifications_blueprint = Blueprint(blueprint_name, __name__, **conf)
 
     notifications_blueprint.add_url_rule('/', view_func=get_routes)
+
+    notifications_blueprint.add_url_rule('/alert', view_func=AlertView.as_view('alert'))
+
+    notifications_blueprint.add_url_rule('/push', view_func=PushView.as_view('push'))
+
+    notifications_blueprint.add_url_rule('/alert/<ident>', view_func=AlertDetailsView.as_view('alert_details'))
+
+    notifications_blueprint.add_url_rule('/alerts', view_func=AlertsView.as_view('alerts'))
 
     return notifications_blueprint
 
