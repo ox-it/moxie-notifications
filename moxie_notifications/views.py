@@ -37,21 +37,39 @@ class PushView(ServiceView):
 
     methods = ['OPTIONS', 'POST']
 
+    MESSAGE_MIN_LENGTH = 3
+    MESSAGE_MAX_LENGTH = 250
+
     def handle_request(self):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
+
         if not message_json or 'alert' not in message_json or 'message' not in message_json:
             raise BadRequest("You must pass a JSON document with properties 'alert' and 'message'")
-        result = service.add_push(message_json)
-        return result
+
+        message = message_json['message'].strip()
+        message_len = len(message)
+        if not self.MESSAGE_MIN_LENGTH <= message_len <= self.MESSAGE_MAX_LENGTH:
+            raise BadRequest("'message' must be between {min} and {max} characters".format(min=self.MESSAGE_MIN_LENGTH,
+                                                                                           max=self.MESSAGE_MAX_LENGTH))
+
+        alert = service.get_alert_by_id(message_json['alert'])
+        if not alert:
+            raise BadRequest("Alert '{uuid}' not found".format(uuid=message_json['alert']))
+
+        try:
+            service.add_push(alert, message)
+            return 'success'
+        except Exception as err:
+            return err.message
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, result):
-        if result:
+        if result and result == 'success':
             response = jsonify({'status': 'success'})
             response.status_code = 202      # Accepted
         else:
-            response = jsonify({'status': 'error'})
+            response = jsonify({'status': result})
             response.status_code = 500
         return response
 
