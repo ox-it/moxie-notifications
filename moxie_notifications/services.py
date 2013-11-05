@@ -9,7 +9,7 @@ class NotificationsService(Service):
     KV_PREFIX = 'notification_'
 
     def get_alert_by_id(self, ident):
-        pass
+        return kv_store.get(self.KV_PREFIX + ident)
 
     def get_active_alerts(self):
         pass
@@ -17,11 +17,11 @@ class NotificationsService(Service):
     def get_all_alerts(self):
         return kv_store.get('notifications')
 
-    def update_alert(self, ident, payload):
-        pass
+    def update_alert(self, ident, alert):
+        kv_store.set(self.KV_PREFIX + ident, alert)
 
     def delete_alert(self, ident):
-        pass
+        kv_store.delete(self.KV_PREFIX + ident)
 
     def add_alert(self, alert):
         """Add an alert

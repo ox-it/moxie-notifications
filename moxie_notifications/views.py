@@ -4,6 +4,7 @@ from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
+from moxie_notifications.representations import HALAlertRepresentation
 from .services import NotificationsService
 from .domain import Alert, PushAlert
 
@@ -90,7 +91,7 @@ class AlertDetailsView(ServiceView):
         if type(response) is tuple:
             return response
         else:
-            return None
+            return HALAlertRepresentation(response, request.url_rule.endpoint)
 
 
 class FollowUpDetailsView(ServiceView):
