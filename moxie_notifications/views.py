@@ -113,7 +113,10 @@ class Register(ServiceView):
 
     def handle_request(self):
         notification_service = NotificationsService.from_context()
-        data = request.get_json()
+        data = request.get_json(force=True, silent=True)
+        # Handle missing/invalid JSON
+        if data is None:
+            return (jsonify(error="Expected JSON in POST data"), 400, {})
         try:
             token = data[self.post_data_key]
         except KeyError:
