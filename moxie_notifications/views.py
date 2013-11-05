@@ -4,7 +4,7 @@ from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
-from moxie_notifications.representations import HALAlertRepresentation
+from moxie_notifications.representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
 
 
@@ -48,11 +48,12 @@ class PushView(ServiceView):
     @accepts(JSON, HAL_JSON)
     def as_json(self, result):
         if result:
-            return jsonify({'status': 'success'})
+            response = jsonify({'status': 'success'})
+            response.status_code = 202      # Accepted
         else:
             response = jsonify({'status': 'error'})
             response.status_code = 500
-            return response
+        return response
 
 
 class AlertsView(ServiceView):
@@ -61,11 +62,11 @@ class AlertsView(ServiceView):
 
     def handle_request(self):
         service = NotificationsService.from_context()
-        return service.get_active_alerts()
+        return service.get_all_alerts()
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, response):
-        pass
+        return HALAlertsRepresentation(response, request.url_rule.endpoint).as_json()
 
 
 class AlertDetailsView(ServiceView):

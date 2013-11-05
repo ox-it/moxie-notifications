@@ -16,7 +16,10 @@ class NotificationsService(ProviderService):
         return provider.add_token(token)
 
     def get_alert_by_id(self, ident):
-        json = kv_store.get(self.KV_PREFIX + ident)
+        return self._get_alert_by_key(self.KV_PREFIX + ident)
+
+    def _get_alert_by_key(self, key):
+        json = kv_store.get(key)
         if json:
             return loads(json)
         else:
@@ -26,7 +29,12 @@ class NotificationsService(ProviderService):
         pass
 
     def get_all_alerts(self):
-        return kv_store.get('notifications')
+        keys = kv_store.keys(self.KV_PREFIX + "*")
+        alerts = []
+        # TODO I'm sure there's a better way to do this kind of multi GET
+        for key in keys:
+            alerts.append(self._get_alert_by_key(key))
+        return alerts
 
     def update_alert(self, ident, alert):
         kv_store.set(self.KV_PREFIX + ident, dumps(alert))
@@ -41,6 +49,7 @@ class NotificationsService(ProviderService):
         """
         alert_uuid = uuid.uuid4()
         alert_uuid = str(alert_uuid)
+        alert['ident'] = alert_uuid
         self.update_alert(alert_uuid, alert)
         return alert_uuid
 
