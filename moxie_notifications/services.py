@@ -1,4 +1,5 @@
 import uuid
+from flask.json import loads, dumps
 
 from moxie.core.service import Service
 from moxie.core.kv import kv_store
@@ -9,7 +10,11 @@ class NotificationsService(Service):
     KV_PREFIX = 'notification_'
 
     def get_alert_by_id(self, ident):
-        return kv_store.get(self.KV_PREFIX + ident)
+        json = kv_store.get(self.KV_PREFIX + ident)
+        if json:
+            return loads(json)
+        else:
+            return None
 
     def get_active_alerts(self):
         pass
@@ -18,7 +23,7 @@ class NotificationsService(Service):
         return kv_store.get('notifications')
 
     def update_alert(self, ident, alert):
-        kv_store.set(self.KV_PREFIX + ident, alert)
+        kv_store.set(self.KV_PREFIX + ident, dumps(alert))
 
     def delete_alert(self, ident):
         kv_store.delete(self.KV_PREFIX + ident)
@@ -30,7 +35,7 @@ class NotificationsService(Service):
         """
         alert_uuid = uuid.uuid4()
         alert_uuid = str(alert_uuid)
-        kv_store.set(self.KV_PREFIX + alert_uuid, alert)
+        self.update_alert(alert_uuid, alert)
         return alert_uuid
 
     def add_push(self, push_alert):

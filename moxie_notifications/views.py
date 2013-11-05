@@ -6,7 +6,6 @@ from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
 from moxie_notifications.representations import HALAlertRepresentation
 from .services import NotificationsService
-from .domain import Alert, PushAlert
 
 
 class AlertView(ServiceView):
@@ -16,8 +15,9 @@ class AlertView(ServiceView):
     def handle_request(self):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
-        alert = Alert.from_json(message_json)
-        result = service.add_alert(alert)
+        if not message_json or 'message' not in message_json:
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        result = service.add_alert(message_json)
         return result
 
     @accepts(JSON, HAL_JSON)
@@ -28,7 +28,9 @@ class AlertView(ServiceView):
             response.status_code = 201
             return response
         else:
-            return jsonify({'status': 'error'}), 500
+            response = jsonify({'status': 'error'})
+            response.status_code = 500
+            return response
 
 
 class PushView(ServiceView):
@@ -38,19 +40,19 @@ class PushView(ServiceView):
     def handle_request(self):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
-        push = PushAlert.from_json(message_json)
-        result = service.add_push(push)
+        if not message_json or 'alert' not in message_json or 'message' not in message_json:
+            raise BadRequest("You must pass a JSON document with properties 'alert' and 'message'")
+        result = service.add_push(message_json)
         return result
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, response):
-        if response:
-            if type(response) is tuple:
-                return response
-            else:
-                return jsonify({'status': 'success'}), 200
+    def as_json(self, result):
+        if result:
+            return jsonify({'status': 'success'})
         else:
-            return jsonify({'status': 'error'}), 500
+            response = jsonify({'status': 'error'})
+            response.status_code = 500
+            return response
 
 
 class AlertsView(ServiceView):
@@ -76,22 +78,25 @@ class AlertDetailsView(ServiceView):
         if not alert:
             raise NotFound()
         if request.method == "GET":
+            alert['ident'] = ident
             return alert
         elif request.method == "POST":
-            alert = service.update_alert(ident, request.get_json(force=True, silent=True))
-            return alert
+            message_json = request.get_json(force=True, silent=True)
+            alert = service.update_alert(ident, message_json)
+            message_json['ident'] = ident
+            return message_json
         elif request.method == "DELETE":
             service.delete_alert(ident)
-            return (jsonify({'status': 'deleted'}), 200)
+            return "deleted"
         else:
             raise BadRequest("Method not suitable (allowed: {methods})".format(methods=','.join(self.METHODS)))
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, response):
-        if type(response) is tuple:
-            return response
+    def as_json(self, result):
+        if type(result) is str and result == "deleted":
+            return jsonify({'status': 'deleted'})
         else:
-            return HALAlertRepresentation(response, request.url_rule.endpoint)
+            return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
 
 
 class FollowUpDetailsView(ServiceView):
