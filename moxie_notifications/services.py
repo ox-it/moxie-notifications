@@ -53,8 +53,9 @@ class NotificationsService(ProviderService):
         self.update_alert(alert_uuid, alert)
         return alert_uuid
 
-    def add_push(self, push_alert):
-        pass
+    def add_push(self, alert, message):
+        for provider in self.providers:
+            provider.notify(message, alert)
 
     def add_followup(self, alert_ident, payload):
         pass
