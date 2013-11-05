@@ -116,18 +116,23 @@ class Register(ServiceView):
         data = request.get_json(force=True, silent=True)
         # Handle missing/invalid JSON
         if data is None:
-            return (jsonify(error="Expected JSON in POST data"), 400, {})
+            response = jsonify(error="Expected JSON in POST data")
+            response.status_code = 400
+            return response
         try:
             token = data[self.post_data_key]
         except KeyError:
-            return (jsonify(error="Expected key: %s" % self.post_data_key),
-                    400, {})
+            response = jsonify(error="Expected key: %s" % self.post_data_key)
+            response.status_code = 400
+            return response
         success = notification_service.register(token, self.platform)
         response = jsonify(success=success)
         if success:
-            return (response, 201, {})
+            # Accepted
+            response.status_code = 202
         else:
-            return (response, 500, {})
+            response.status_code = 500
+        return response
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
