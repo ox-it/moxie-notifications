@@ -6,7 +6,6 @@ from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
 from moxie_notifications.representations import HALAlertRepresentation
 from .services import NotificationsService, ANDROID, iOS
-from .domain import Alert, PushAlert
 
 
 class AlertView(ServiceView):
