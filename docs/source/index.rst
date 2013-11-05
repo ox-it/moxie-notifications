@@ -19,6 +19,7 @@ Developer
 
 .. toctree::
 
+    developer/configuration
     developer/models
 
 
