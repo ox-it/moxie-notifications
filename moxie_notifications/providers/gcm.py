@@ -5,6 +5,7 @@ from gcmclient import GCM, JSONMessage, GCMAuthenticationError
 from moxie.core.kv import kv_store
 from moxie_notifications.providers import NotificationsProvider
 from moxie_notifications.services import ANDROID
+from moxie_notifications.tasks import retry_gcm
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,8 @@ class GCMProvider(NotificationsProvider):
                 reg_id))
             kv_store.srem(self.provider_set, reg_id)
 
-    def notify(self, message, alert, registration_ids=[], all_devices=True):
+    def notify(self, message, alert, registration_ids=[], all_devices=True,
+            retry=0):
         if all_devices:
             registration_ids = self._get_all_registration_ids()
 
@@ -68,3 +70,9 @@ class GCMProvider(NotificationsProvider):
             logger.exception("Invalid message or response %s" % e.args[0])
         else:
             self._update_with_result(result)
+            if result.needs_retry():
+                # Place task on queue to retry later
+                retry = result.retry()
+                retry_gcm.apply_async((message, retry.registration_ids),
+                    {'retry': retry},
+                    countdown=result.delay(retry=retry))
