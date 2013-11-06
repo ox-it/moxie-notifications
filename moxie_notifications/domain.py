@@ -57,7 +57,8 @@ class PushAlert(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
-    #alert = relationship("Alert", backref='pushs')
+    alert_id = db.Column(db.Integer, db.ForeignKey(Alert.__tablename__+'.id'))
+    alert = db.relationship("Alert")
 
     def __init__(self, message, alert):
         self.message = message
