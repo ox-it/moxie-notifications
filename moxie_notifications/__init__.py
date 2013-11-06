@@ -4,7 +4,7 @@ from flask.helpers import make_response
 from moxie.core.representations import HALRepresentation
 
 from .views import (AlertView, PushView, AlertsView, AlertDetailsView,
-        RegisterGCM, RegisterAPNS)
+        RegisterGCM, RegisterAPNS, AlertAddFollowUpView, FollowUpDetailsView)
 
 
 def create_blueprint(blueprint_name, conf):
@@ -17,6 +17,12 @@ def create_blueprint(blueprint_name, conf):
     notifications_blueprint.add_url_rule('/push', view_func=PushView.as_view('push'))
 
     notifications_blueprint.add_url_rule('/alert/<ident>', view_func=AlertDetailsView.as_view('alert_details'))
+
+    notifications_blueprint.add_url_rule('/alert/<ident>/followup/<id>',
+                                         view_func=FollowUpDetailsView.as_view('followp_details'))
+
+    notifications_blueprint.add_url_rule('/alert/<ident>/followup',
+                                         view_func=AlertAddFollowUpView.as_view('alert_add_followup'))
 
     notifications_blueprint.add_url_rule('/alerts', view_func=AlertsView.as_view('alerts'))
 

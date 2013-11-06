@@ -51,6 +51,10 @@ class FollowUp(db.Model):
     def __repr__(self):
         return "<FollowUp('{id}')>".format(id=self.id)
 
+    def as_dict(self):
+        values = {'message': self.message}
+        return values
+
 
 class PushAlert(db.Model):
     __tablename__ = 'pushalerts'

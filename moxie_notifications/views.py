@@ -4,6 +4,7 @@ from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
+from moxie_notifications.domain import FollowUp
 from .representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
 from .domain import Alert
@@ -120,9 +121,34 @@ class AlertDetailsView(ServiceView):
             return HALAlertRepresentation(result.as_dict(), request.url_rule.endpoint).as_json()
 
 
+class AlertAddFollowUpView(ServiceView):
+
+    methods = ['OPTIONS', 'POST']
+
+    def handle_request(self, ident):
+        service = NotificationsService.from_context()
+        alert = service.get_alert_by_id(ident)
+        if not alert:
+            raise BadRequest("Alert '{ident}' not found".format(ident=ident))
+        message_json = request.get_json(force=True, silent=True)
+        # TODO refactor validations
+        if not message_json or 'message' not in message_json:
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        fu = FollowUp(message_json['message'])
+        service.add_followup(alert, fu)
+        return True
+
+    @accepts(JSON, HAL_JSON)
+    def as_json(self, response):
+        return jsonify({'status': 'created'})
+
+
 class FollowUpDetailsView(ServiceView):
 
-    methods = ['OPTIONS', 'GET']
+    methods = ['OPTIONS', 'GET', 'POST', 'DELETE']
+
+    def handle_request(self, ident, id):
+        service = NotificationsService.from_context()
 
 
 class Register(ServiceView):

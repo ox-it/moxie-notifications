@@ -42,7 +42,12 @@ class NotificationsService(ProviderService):
         for provider in self.providers:
             provider.notify(message, alert)
 
-    def persist_followup(self, alert, followup):
+    def add_followup(self, alert, followup):
+        assert alert in db.session
+        alert.followups.append(followup)
+        self._db_merge(alert)
+
+    def update_followup(self, followup):
         pass
 
     def delete_followup(self, followup):

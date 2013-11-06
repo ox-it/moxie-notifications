@@ -4,6 +4,19 @@ from flask.helpers import url_for
 from moxie.core.representations import HALRepresentation
 
 
+class HALFollowUpRepresentation(object):
+
+    def __init__(self, fu, alert, endpoint):
+        self.followup = fu
+        self.alert = alert
+        self.endpoint = endpoint
+
+    def as_dict(self):
+        representation = HALRepresentation(self.followup)
+        representation.add_link('self', url_for(self.endpoint, ident=self.alert.get('ident')))
+        return representation.as_dict()
+
+
 class HALAlertRepresentation(object):
 
     def __init__(self, alert, endpoint):
