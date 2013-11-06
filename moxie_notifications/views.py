@@ -100,7 +100,6 @@ class AlertDetailsView(ServiceView):
         if not alert:
             raise NotFound()
         if request.method == "GET":
-            alert['ident'] = ident
             return alert
         elif request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
@@ -118,7 +117,7 @@ class AlertDetailsView(ServiceView):
         if type(result) is str and result == "deleted":
             return jsonify({'status': 'deleted'})
         else:
-            return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
+            return HALAlertRepresentation(result.as_dict(), request.url_rule.endpoint).as_json()
 
 
 class FollowUpDetailsView(ServiceView):

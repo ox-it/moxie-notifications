@@ -1,5 +1,6 @@
 import uuid
 from flask.json import loads, dumps
+from sqlalchemy.orm.exc import NoResultFound
 
 from moxie.core.service import ProviderService
 from moxie.core.kv import kv_store
@@ -19,13 +20,9 @@ class NotificationsService(ProviderService):
         return provider.add_token(token)
 
     def get_alert_by_id(self, ident):
-        return self._get_alert_by_key(self.KV_PREFIX + ident)
-
-    def _get_alert_by_key(self, key):
-        json = kv_store.get(key)
-        if json:
-            return loads(json)
-        else:
+        try:
+            return Alert.query.filter(Alert.uuid == ident).one()
+        except NoResultFound:
             return None
 
     def get_active_alerts(self):
