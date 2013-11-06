@@ -28,25 +28,41 @@ class NotificationsService(ProviderService):
     def get_all_alerts(self):
         return Alert.query.all()
 
-    def persist_alert(self, alert):
-        db.session.add(alert)
-        db.session.commit()
-        return alert
+    def add_alert(self, alert):
+        return self._db_persist(alert)
+
+    def update_alert(self, alert):
+        return self._db_merge(alert)
 
     def delete_alert(self, alert):
-        db.session.delete(alert)
-        db.session.commit()
+        self._db_delete(alert)
 
     def add_push(self, alert, message):
         # TODO should store the push as well?
         for provider in self.providers:
             provider.notify(message, alert)
 
-    def add_followup(self, alert_ident, payload):
+    def persist_followup(self, alert, followup):
         pass
 
-    def update_followup(self, ident):
-        pass
+    def delete_followup(self, followup):
+        self._db_delete(followup)
 
-    def delete_followup(self, ident):
-        pass
+    def _db_persist(self, obj):
+        """Attach the object to the session
+        and commit
+        :param obj: object to persist
+        :return obj object attached to the session
+        """
+        db.session.add(obj)
+        db.session.commit()
+        return obj
+
+    def _db_merge(self, obj):
+        val = db.session.merge(obj)
+        db.session.commit()
+        return val
+
+    def _db_delete(self, obj):
+        db.session.delete(obj)
+        db.session.commit()

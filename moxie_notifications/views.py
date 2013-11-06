@@ -19,7 +19,7 @@ class AlertView(ServiceView):
         if not message_json or 'message' not in message_json:
             raise BadRequest("You must pass a JSON document with property 'message'")
         alert = Alert(message_json['message'])
-        result = service.persist_alert(alert)
+        result = service.add_alert(alert)
         return result
 
     @accepts(JSON, HAL_JSON)
@@ -104,7 +104,7 @@ class AlertDetailsView(ServiceView):
         elif request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
             alert.message = message_json['message']
-            alert = service.persist_alert(alert)
+            alert = service.update_alert(alert)
             return alert
         elif request.method == "DELETE":
             service.delete_alert(alert)
