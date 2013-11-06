@@ -31,6 +31,10 @@ class Alert(db.Model):
         values = {'message': self.message}
         if self.uuid:
             values['ident'] = self.uuid
+        if self.from_date:
+            values['fromDate'] = self.from_date.isoformat()
+        if self.display_until:
+            values['displayUntil'] = self.display_until.isoformat()
         return values
 
 
