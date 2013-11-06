@@ -38,6 +38,7 @@ class NotificationsService(ProviderService):
         db.session.commit()
 
     def add_push(self, alert, message):
+        # TODO should store the push as well?
         for provider in self.providers:
             provider.notify(message, alert)
 
