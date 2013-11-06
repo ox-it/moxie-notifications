@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 from moxie.core.db import db
@@ -13,8 +14,12 @@ class Alert(db.Model):
     display_until = db.Column(db.DateTime)
     followups = db.relationship("FollowUp")
 
-    def __init__(self, message, uuid=None, from_date=None, display_until=None):
-        self.uuid = uuid
+    def __init__(self, message, ident=None, from_date=None, display_until=None):
+        if not ident:
+            alert_uuid = uuid.uuid4()
+            self.uuid = str(alert_uuid)
+        else:
+            self.uuid = ident
         self.message = message
         self.from_date = from_date or datetime.now()
         self.display_until = display_until or datetime.now() + timedelta(hours=1)

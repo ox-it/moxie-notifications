@@ -4,8 +4,9 @@ from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
-from moxie_notifications.representations import HALAlertRepresentation, HALAlertsRepresentation
+from .representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
+from .domain import Alert
 
 
 class AlertView(ServiceView):
@@ -17,16 +18,15 @@ class AlertView(ServiceView):
         message_json = request.get_json(force=True, silent=True, cache=True)
         if not message_json or 'message' not in message_json:
             raise BadRequest("You must pass a JSON document with property 'message'")
-        from moxie_notifications.domain import Alert
         alert = Alert(message_json['message'])
-        result = service.add_alert(alert)
+        result = service.persist_alert(alert)
         return result
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, ident):
-        if ident:
+    def as_json(self, alert):
+        if alert:
             response = jsonify({'status': 'created'})
-            response.headers.add('Location', url_for('notifications.alert_details', ident=ident))
+            response.headers.add('Location', url_for('notifications.alert_details', ident=alert.uuid))
             response.status_code = 201
             return response
         else:
@@ -103,11 +103,11 @@ class AlertDetailsView(ServiceView):
             return alert
         elif request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
-            alert = service.update_alert(ident, message_json)
-            message_json['ident'] = ident
-            return message_json
+            alert.message = message_json['message']
+            alert = service.persist_alert(alert)
+            return alert
         elif request.method == "DELETE":
-            service.delete_alert(ident)
+            service.delete_alert(alert)
             return "deleted"
         else:
             raise BadRequest("Method not suitable (allowed: {methods})".format(methods=','.join(self.METHODS)))

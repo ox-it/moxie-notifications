@@ -31,23 +31,14 @@ class NotificationsService(ProviderService):
     def get_all_alerts(self):
         return Alert.query.all()
 
-    def update_alert(self, ident, alert):
-        kv_store.set(self.KV_PREFIX + ident, dumps(alert))
-
-    def delete_alert(self, ident):
-        kv_store.delete(self.KV_PREFIX + ident)
-
-    def add_alert(self, alert):
-        """Add an alert
-        :param alert: Alert domain object
-        :return uuid of the alert
-        """
-        alert_uuid = uuid.uuid4()
-        alert_uuid = str(alert_uuid)
-        alert.uuid = alert_uuid
+    def persist_alert(self, alert):
         db.session.add(alert)
         db.session.commit()
-        return alert_uuid
+        return alert
+
+    def delete_alert(self, alert):
+        db.session.delete(alert)
+        db.session.commit()
 
     def add_push(self, alert, message):
         for provider in self.providers:
