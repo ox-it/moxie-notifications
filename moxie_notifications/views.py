@@ -86,7 +86,8 @@ class AlertsView(ServiceView):
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, response):
-        return HALAlertsRepresentation(response, request.url_rule.endpoint).as_json()
+        dicts = [alert.as_dict() for alert in response]
+        return HALAlertsRepresentation(dicts, request.url_rule.endpoint).as_json()
 
 
 class AlertDetailsView(ServiceView):

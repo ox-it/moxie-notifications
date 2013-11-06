@@ -33,12 +33,6 @@ class NotificationsService(ProviderService):
 
     def get_all_alerts(self):
         return Alert.query.all()
-        keys = kv_store.keys(self.KV_PREFIX + "*")
-        alerts = []
-        # TODO I'm sure there's a better way to do this kind of multi GET
-        for key in keys:
-            alerts.append(self._get_alert_by_key(key))
-        return alerts
 
     def update_alert(self, ident, alert):
         kv_store.set(self.KV_PREFIX + ident, dumps(alert))

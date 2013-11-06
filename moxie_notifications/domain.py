@@ -22,6 +22,12 @@ class Alert(db.Model):
     def __repr__(self):
         return "<Alert('{uuid}')>".format(uuid=self.uuid)
 
+    def as_dict(self):
+        values = {'message': self.message}
+        if self.uuid:
+            values['ident'] = self.uuid
+        return values
+
 
 class FollowUp(db.Model):
     __tablename__ = 'followups'
