@@ -3,6 +3,9 @@ from flask.json import loads, dumps
 
 from moxie.core.service import ProviderService
 from moxie.core.kv import kv_store
+from moxie.core.db import db
+
+from .domain import Alert
 
 ANDROID = 'android'
 iOS = 'iOS'
@@ -29,6 +32,7 @@ class NotificationsService(ProviderService):
         pass
 
     def get_all_alerts(self):
+        return Alert.query.all()
         keys = kv_store.keys(self.KV_PREFIX + "*")
         alerts = []
         # TODO I'm sure there's a better way to do this kind of multi GET
@@ -49,8 +53,9 @@ class NotificationsService(ProviderService):
         """
         alert_uuid = uuid.uuid4()
         alert_uuid = str(alert_uuid)
-        alert['ident'] = alert_uuid
-        self.update_alert(alert_uuid, alert)
+        alert.uuid = alert_uuid
+        db.session.add(alert)
+        db.session.commit()
         return alert_uuid
 
     def add_push(self, alert, message):

@@ -17,7 +17,9 @@ class AlertView(ServiceView):
         message_json = request.get_json(force=True, silent=True, cache=True)
         if not message_json or 'message' not in message_json:
             raise BadRequest("You must pass a JSON document with property 'message'")
-        result = service.add_alert(message_json)
+        from moxie_notifications.domain import Alert
+        alert = Alert(message_json['message'])
+        result = service.add_alert(alert)
         return result
 
     @accepts(JSON, HAL_JSON)
