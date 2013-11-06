@@ -1,9 +1,6 @@
-import uuid
-from flask.json import loads, dumps
 from sqlalchemy.orm.exc import NoResultFound
 
 from moxie.core.service import ProviderService
-from moxie.core.kv import kv_store
 from moxie.core.db import db
 
 from .domain import Alert
