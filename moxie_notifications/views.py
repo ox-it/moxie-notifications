@@ -149,10 +149,8 @@ class FollowUpDetailsView(ServiceView):
         self.service = NotificationsService.from_context()
         self.alert = self.service.get_alert_by_id(ident)
         if self.alert:
-            followup = self.service.get_followup_by_id(id)
-            if followup:
-                self.followup = followup
-            else:
+            self.followup = self.service.get_followup_by_id(id)
+            if not self.followup:
                 raise NotFound("FollowUp not found")
         else:
             raise NotFound("Alert not found")
