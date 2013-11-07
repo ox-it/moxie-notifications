@@ -129,7 +129,7 @@ class AlertAddFollowUpView(ServiceView):
         service = NotificationsService.from_context()
         alert = service.get_alert_by_id(ident)
         if not alert:
-            raise BadRequest("Alert '{ident}' not found".format(ident=ident))
+            raise NotFound("Alert not found")
         message_json = request.get_json(force=True, silent=True)
         _validate_followup_json(message_json)
         fu = FollowUp(message_json['message'])
