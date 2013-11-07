@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import request, jsonify
 from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
@@ -21,6 +22,10 @@ class AlertView(ServiceView):
         if not _validate_alert_json(message_json):
             raise BadRequest("You must pass a JSON document with property 'message'")
         alert = Alert(message_json['message'])
+        if 'fromDate' in message_json:
+            alert.from_date = _str_to_datetime(message_json['fromDate'])
+        if 'displayUntil' in message_json:
+            alert.display_until = _str_to_datetime(message_json['displayUntil'])
         result = service.add_alert(alert)
         return result
 
@@ -244,3 +249,7 @@ def _validate_followup_json(obj):
     if not obj or 'message' not in obj:
         return False
     return True
+
+
+def _str_to_datetime(obj):
+    return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S")
