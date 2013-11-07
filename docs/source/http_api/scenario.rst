@@ -16,6 +16,7 @@ Create a new alert
     
         {
             "message": "Bomb threat at X",
+            "displayUntil": "2013-11-08T16:00:00",
         }
 
     **Response**:
