@@ -48,7 +48,7 @@ class GCMProvider(NotificationsProvider):
             kv_store.srem(self.provider_set, reg_id)
 
     def notify(self, message, alert, registration_ids=[], all_devices=True,
-            retry=0):
+            retry_count=0):
         if all_devices:
             registration_ids = self._get_all_registration_ids()
 
@@ -72,7 +72,12 @@ class GCMProvider(NotificationsProvider):
             self._update_with_result(result)
             if result.needs_retry():
                 # Place task on queue to retry later
-                retry = result.retry()
-                retry_gcm.apply_async((message, retry.registration_ids),
-                    {'retry': retry},
-                    countdown=result.delay(retry=retry))
+                retry_count = retry_count + 1
+                delay = result.delay(retry=retry_count)
+                retry_message = result.retry()
+                logger.info("Queuing %s devices for retry in %s seconds."
+                        % (len(retry_message.registration_ids), delay))
+                retry_gcm.apply_async(
+                    (message, retry_message.registration_ids),
+                    {'retry_count': retry_count},
+                    countdown=delay)
