@@ -18,8 +18,7 @@ class AlertView(ServiceView):
     def handle_request(self):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
-        if not message_json or 'message' not in message_json:
-            raise BadRequest("You must pass a JSON document with property 'message'")
+        _validate_alert_json(message_json)
         alert = Alert(message_json['message'])
         result = service.add_alert(alert)
         return result
@@ -104,6 +103,7 @@ class AlertDetailsView(ServiceView):
             return alert
         elif request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
+            _validate_alert_json(message_json)
             alert.message = message_json['message']
             alert = service.update_alert(alert)
             return alert
@@ -131,9 +131,7 @@ class AlertAddFollowUpView(ServiceView):
         if not alert:
             raise BadRequest("Alert '{ident}' not found".format(ident=ident))
         message_json = request.get_json(force=True, silent=True)
-        # TODO refactor validations
-        if not message_json or 'message' not in message_json:
-            raise BadRequest("You must pass a JSON document with property 'message'")
+        _validate_followup_json(message_json)
         fu = FollowUp(message_json['message'])
         service.add_followup(alert, fu)
         return True
@@ -173,9 +171,7 @@ class FollowUpDetailsView(ServiceView):
 
     def _handle_POST(self):
         message_json = request.get_json(force=True, silent=True)
-        # TODO refactor validations
-        if not message_json or 'message' not in message_json:
-            raise BadRequest("You must pass a JSON document with property 'message'")
+        _validate_followup_json(message_json)
         self.followup.message = message_json['message']
         self.service.update_followup(self.followup)
         return self.followup
@@ -234,3 +230,15 @@ class RegisterGCM(Register):
 class RegisterAPNS(Register):
     platform = iOS
     post_data_key = 'device_token'
+
+
+def _validate_alert_json(obj):
+    if not obj or 'message' not in obj:
+        raise BadRequest("You must pass a JSON document with property 'message'")
+    return True
+
+
+def _validate_followup_json(obj):
+    if not obj or 'message' not in obj:
+        raise BadRequest("You must pass a JSON document with property 'message'")
+    return True
