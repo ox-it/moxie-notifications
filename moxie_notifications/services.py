@@ -4,6 +4,7 @@ from moxie.core.service import ProviderService
 from moxie.core.db import db
 
 from .domain import Alert
+from moxie_notifications.domain import FollowUp
 
 ANDROID = 'android'
 iOS = 'iOS'
@@ -46,6 +47,12 @@ class NotificationsService(ProviderService):
         assert alert in db.session
         alert.followups.append(followup)
         self._db_merge(alert)
+
+    def get_followup_by_id(self, id):
+        try:
+            return FollowUp.query.filter(FollowUp.id == id).one()
+        except NoResultFound:
+            return None
 
     def update_followup(self, followup):
         pass

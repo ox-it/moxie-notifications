@@ -5,6 +5,7 @@ from moxie.core.exceptions import NotFound, BadRequest
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
 from moxie_notifications.domain import FollowUp
+from moxie_notifications.representations import HALFollowUpRepresentation
 from .representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
 from .domain import Alert
@@ -86,9 +87,8 @@ class AlertsView(ServiceView):
         return service.get_all_alerts()
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, response):
-        dicts = [alert.as_dict() for alert in response]
-        return HALAlertsRepresentation(dicts, request.url_rule.endpoint).as_json()
+    def as_json(self, alerts):
+        return HALAlertsRepresentation(alerts, request.url_rule.endpoint).as_json()
 
 
 class AlertDetailsView(ServiceView):
@@ -118,7 +118,7 @@ class AlertDetailsView(ServiceView):
         if type(result) is str and result == "deleted":
             return jsonify({'status': 'deleted'})
         else:
-            return HALAlertRepresentation(result.as_dict(), request.url_rule.endpoint).as_json()
+            return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
 
 
 class AlertAddFollowUpView(ServiceView):
@@ -149,6 +149,19 @@ class FollowUpDetailsView(ServiceView):
 
     def handle_request(self, ident, id):
         service = NotificationsService.from_context()
+        self.alert = service.get_alert_by_id(ident)
+        if self.alert:
+            followup = service.get_followup_by_id(id)
+            if followup:
+                return followup
+            else:
+                raise NotFound("FollowUp not found")
+        else:
+            raise NotFound("Alert not found")
+
+    @accepts(JSON, HAL_JSON)
+    def as_json(self, response):
+        return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
 
 
 class Register(ServiceView):
