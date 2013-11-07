@@ -43,7 +43,7 @@ class FollowUp(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
-    alert_id = db.Column(db.Integer, db.ForeignKey(Alert.__tablename__+'.id'))
+    alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
 
     def __init__(self, message):
         self.message = message
@@ -61,7 +61,7 @@ class PushAlert(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
-    alert_id = db.Column(db.Integer, db.ForeignKey(Alert.__tablename__+'.id'))
+    alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
     alert = db.relationship("Alert")
 
     def __init__(self, message, alert):
