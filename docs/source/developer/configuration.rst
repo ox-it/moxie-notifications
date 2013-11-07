@@ -1,6 +1,19 @@
 Configuration
 =============
 
+Database
+--------
+
+You do need to have a database configured, the key ``SQLALCHEMY_DATABASE_URI`` in the ``flask`` section should be documented.
+
+See `SQLAlchemy documentation <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html>`_ for more information on engines.
+
+::
+
+    flask:
+        SQLALCHEMY_DATABASE_URI: 'sqlite:////tmp/test.db'
+
+
 NotificationsService
 --------------------
 
