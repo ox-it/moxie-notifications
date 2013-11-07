@@ -115,7 +115,7 @@ class AlertDetailsView(ServiceView):
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, result):
-        if type(result) is str and result == "deleted":
+        if result == "deleted":
             return jsonify({'status': 'deleted'})
         else:
             return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
@@ -182,7 +182,7 @@ class FollowUpDetailsView(ServiceView):
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, response):
-        if type(response) is str and response == "deleted":
+        if response == "deleted":
             return jsonify({'status': 'deleted'})
         else:
             return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
