@@ -1,8 +1,10 @@
-import uuid
-from flask.json import loads, dumps
+from sqlalchemy.orm.exc import NoResultFound
 
 from moxie.core.service import ProviderService
-from moxie.core.kv import kv_store
+from moxie.core.db import db
+
+from .domain import Alert
+from moxie_notifications.domain import FollowUp
 
 ANDROID = 'android'
 iOS = 'iOS'
@@ -16,52 +18,68 @@ class NotificationsService(ProviderService):
         return provider.add_token(token)
 
     def get_alert_by_id(self, ident):
-        return self._get_alert_by_key(self.KV_PREFIX + ident)
-
-    def _get_alert_by_key(self, key):
-        json = kv_store.get(key)
-        if json:
-            return loads(json)
-        else:
+        try:
+            return Alert.query.filter(Alert.uuid == ident).one()
+        except NoResultFound:
             return None
 
     def get_active_alerts(self):
         pass
 
     def get_all_alerts(self):
-        keys = kv_store.keys(self.KV_PREFIX + "*")
-        alerts = []
-        # TODO I'm sure there's a better way to do this kind of multi GET
-        for key in keys:
-            alerts.append(self._get_alert_by_key(key))
-        return alerts
-
-    def update_alert(self, ident, alert):
-        kv_store.set(self.KV_PREFIX + ident, dumps(alert))
-
-    def delete_alert(self, ident):
-        kv_store.delete(self.KV_PREFIX + ident)
+        return Alert.query.all()
 
     def add_alert(self, alert):
-        """Add an alert
-        :param alert: Alert domain object
-        :return uuid of the alert
-        """
-        alert_uuid = uuid.uuid4()
-        alert_uuid = str(alert_uuid)
-        alert['ident'] = alert_uuid
-        self.update_alert(alert_uuid, alert)
-        return alert_uuid
+        return self._db_persist(alert)
+
+    def update_alert(self, alert):
+        return self._db_merge(alert)
+
+    def delete_alert(self, alert):
+        self._db_delete(alert)
 
     def add_push(self, alert, message):
+        # TODO should store the push as well?
         for provider in self.providers:
             provider.notify(message, alert)
 
-    def add_followup(self, alert_ident, payload):
-        pass
+    def add_followup(self, alert, followup):
+        assert alert in db.session
+        alert.followups.append(followup)
+        self._db_merge(alert)
 
-    def update_followup(self, ident):
-        pass
+    def get_followup_by_id(self, id):
+        try:
+            return FollowUp.query.filter(FollowUp.id == id).one()
+        except NoResultFound:
+            return None
 
-    def delete_followup(self, ident):
-        pass
+    def update_followup(self, followup):
+        return self._db_merge(followup)
+
+    def delete_followup(self, followup):
+        self._db_delete(followup)
+
+    def _db_persist(self, obj):
+        """Attach the object to the session
+        and commit
+        :param obj: object to persist
+        :return obj object attached to the session
+        """
+        db.session.add(obj)
+        db.session.commit()
+        return obj
+
+    def _db_merge(self, obj):
+        """Attach the object to the session, reconcilies
+        data with state in session.
+        :param obj: object to attach to the session
+        :return obj object attached to the session
+        """
+        val = db.session.merge(obj)
+        db.session.commit()
+        return val
+
+    def _db_delete(self, obj):
+        db.session.delete(obj)
+        db.session.commit()

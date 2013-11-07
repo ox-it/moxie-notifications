@@ -4,8 +4,11 @@ from moxie.core.exceptions import NotFound, BadRequest
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import HAL_JSON, JSON
-from moxie_notifications.representations import HALAlertRepresentation, HALAlertsRepresentation
+from moxie_notifications.domain import FollowUp
+from moxie_notifications.representations import HALFollowUpRepresentation
+from .representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
+from .domain import Alert
 
 
 class AlertView(ServiceView):
@@ -15,16 +18,17 @@ class AlertView(ServiceView):
     def handle_request(self):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
-        if not message_json or 'message' not in message_json:
+        if not _validate_alert_json(message_json):
             raise BadRequest("You must pass a JSON document with property 'message'")
-        result = service.add_alert(message_json)
+        alert = Alert(message_json['message'])
+        result = service.add_alert(alert)
         return result
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, ident):
-        if ident:
+    def as_json(self, alert):
+        if alert:
             response = jsonify({'status': 'created'})
-            response.headers.add('Location', url_for('notifications.alert_details', ident=ident))
+            response.headers.add('Location', url_for('notifications.alert_details', ident=alert.uuid))
             response.status_code = 201
             return response
         else:
@@ -83,8 +87,8 @@ class AlertsView(ServiceView):
         return service.get_all_alerts()
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, response):
-        return HALAlertsRepresentation(response, request.url_rule.endpoint).as_json()
+    def as_json(self, alerts):
+        return HALAlertsRepresentation(alerts, request.url_rule.endpoint).as_json()
 
 
 class AlertDetailsView(ServiceView):
@@ -97,30 +101,93 @@ class AlertDetailsView(ServiceView):
         if not alert:
             raise NotFound()
         if request.method == "GET":
-            alert['ident'] = ident
             return alert
         elif request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
-            alert = service.update_alert(ident, message_json)
-            message_json['ident'] = ident
-            return message_json
+            if not _validate_alert_json(message_json):
+                raise BadRequest("You must pass a JSON document with property 'message'")
+            alert.message = message_json['message']
+            alert = service.update_alert(alert)
+            return alert
         elif request.method == "DELETE":
-            service.delete_alert(ident)
+            service.delete_alert(alert)
             return "deleted"
         else:
             raise BadRequest("Method not suitable (allowed: {methods})".format(methods=','.join(self.METHODS)))
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, result):
-        if type(result) is str and result == "deleted":
+        if result == "deleted":
             return jsonify({'status': 'deleted'})
         else:
             return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
 
 
+class AlertAddFollowUpView(ServiceView):
+
+    methods = ['OPTIONS', 'POST']
+
+    def handle_request(self, ident):
+        service = NotificationsService.from_context()
+        alert = service.get_alert_by_id(ident)
+        if not alert:
+            raise NotFound("Alert not found")
+        message_json = request.get_json(force=True, silent=True)
+        if not _validate_followup_json(message_json):
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        fu = FollowUp(message_json['message'])
+        service.add_followup(alert, fu)
+        return True
+
+    @accepts(JSON, HAL_JSON)
+    def as_json(self, response):
+        return jsonify({'status': 'created'})
+
+
 class FollowUpDetailsView(ServiceView):
 
-    methods = ['OPTIONS', 'GET']
+    methods = ['OPTIONS', 'GET', 'POST', 'DELETE']
+
+    def handle_request(self, ident, id):
+        self.service = NotificationsService.from_context()
+        self.alert = self.service.get_alert_by_id(ident)
+        if self.alert:
+            self.followup = self.service.get_followup_by_id(id)
+            if not self.followup:
+                raise NotFound("FollowUp not found")
+        else:
+            raise NotFound("Alert not found")
+
+        if request.method == "GET":
+            return self._handle_GET()
+        elif request.method == "POST":
+            return self._handle_POST()
+        elif request.method == "DELETE":
+            return self._handle_DELETE()
+        else:
+            raise BadRequest("Method {method} not valid".format(method=request.method))
+
+    def _handle_GET(self):
+        return self.followup
+
+    def _handle_POST(self):
+        message_json = request.get_json(force=True, silent=True)
+        if not _validate_followup_json(message_json):
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        self.followup.message = message_json['message']
+        self.service.update_followup(self.followup)
+        return self.followup
+
+    def _handle_DELETE(self):
+        self.service.delete_followup(self.followup)
+        return 'deleted'
+
+    @accepts(JSON, HAL_JSON)
+    def as_json(self, response):
+        if response == "deleted":
+            return jsonify({'status': 'deleted'})
+        else:
+            return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
 
 
 class Register(ServiceView):
@@ -165,3 +232,15 @@ class RegisterGCM(Register):
 class RegisterAPNS(Register):
     platform = iOS
     post_data_key = 'device_token'
+
+
+def _validate_alert_json(obj):
+    if not obj or 'message' not in obj:
+        return False
+    return True
+
+
+def _validate_followup_json(obj):
+    if not obj or 'message' not in obj:
+        return False
+    return True
