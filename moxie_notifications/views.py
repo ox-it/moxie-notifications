@@ -148,20 +148,48 @@ class FollowUpDetailsView(ServiceView):
     methods = ['OPTIONS', 'GET', 'POST', 'DELETE']
 
     def handle_request(self, ident, id):
-        service = NotificationsService.from_context()
-        self.alert = service.get_alert_by_id(ident)
+        self.service = NotificationsService.from_context()
+        self.alert = self.service.get_alert_by_id(ident)
         if self.alert:
-            followup = service.get_followup_by_id(id)
+            followup = self.service.get_followup_by_id(id)
             if followup:
-                return followup
+                self.followup = followup
             else:
                 raise NotFound("FollowUp not found")
         else:
             raise NotFound("Alert not found")
 
+        if request.method == "GET":
+            return self._handle_GET()
+        elif request.method == "POST":
+            return self._handle_POST()
+        elif request.method == "DELETE":
+            return self._handle_DELETE()
+        else:
+            raise BadRequest("Method {method} not valid".format(method=request.method))
+
+    def _handle_GET(self):
+        return self.followup
+
+    def _handle_POST(self):
+        message_json = request.get_json(force=True, silent=True)
+        # TODO refactor validations
+        if not message_json or 'message' not in message_json:
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        self.followup.message = message_json['message']
+        self.service.update_followup(self.followup)
+        return self.followup
+
+    def _handle_DELETE(self):
+        self.service.delete_followup(self.followup)
+        return 'deleted'
+
     @accepts(JSON, HAL_JSON)
     def as_json(self, response):
-        return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
+        if type(response) is str and response == "deleted":
+            return jsonify({'status': 'deleted'})
+        else:
+            return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
 
 
 class Register(ServiceView):

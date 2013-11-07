@@ -55,7 +55,7 @@ class NotificationsService(ProviderService):
             return None
 
     def update_followup(self, followup):
-        pass
+        return self._db_merge(followup)
 
     def delete_followup(self, followup):
         self._db_delete(followup)
