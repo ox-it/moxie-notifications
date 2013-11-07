@@ -112,6 +112,10 @@ class AlertDetailsView(ServiceView):
             if not _validate_alert_json(message_json):
                 raise BadRequest("You must pass a JSON document with property 'message'")
             alert.message = message_json['message']
+            if 'fromDate' in message_json:
+                alert.from_date = _str_to_datetime(message_json['fromDate'])
+            if 'displayUntil' in message_json:
+                alert.display_until = _str_to_datetime(message_json['displayUntil'])
             alert = service.update_alert(alert)
             return alert
         elif request.method == "DELETE":
