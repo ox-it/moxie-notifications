@@ -71,6 +71,11 @@ class NotificationsService(ProviderService):
         return obj
 
     def _db_merge(self, obj):
+        """Attach the object to the session, reconcilies
+        data with state in session.
+        :param obj: object to attach to the session
+        :return obj object attached to the session
+        """
         val = db.session.merge(obj)
         db.session.commit()
         return val
