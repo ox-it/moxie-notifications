@@ -42,8 +42,15 @@ class NotificationsService(ProviderService):
 
     def add_push(self, alert, message):
         # TODO should store the push as well?
+        errors = []
+        # Each provider can fail independently so collect all possible errors
         for provider in self.providers:
-            provider.notify(message, alert)
+            try:
+                provider.notify(message, alert)
+            except Exception as err:
+                msg = "%s: %s" % (provider.__class__.__name__, err.message)
+                errors.append(msg)
+        return errors
 
     def add_followup(self, alert, followup):
         assert alert in db.session

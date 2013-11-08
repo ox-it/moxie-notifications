@@ -43,6 +43,19 @@ key_file
 passphrase
     (optional) Passphrase for private key file.
 
+moxie_notifications.providers.mail.EmailNotificationsProvider
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is mainly used for development purpose.
+
+smtp_server
+    Address of the SMTP server
+
+sender_email
+    Email address of the sender
+
+send_to
+    List of email addresses where notifications should be send to
 
 Example Configuration
 ---------------------
@@ -57,5 +70,10 @@ Example Configuration
               moxie_notifications.providers.apns.APNSProvider:
                   address: 'push_sandbox'
                   cert_file: '/srv/moxie/foo.pem'
+              moxie_notifications.providers.mail.EmailNotificationsProvider:
+                   smtp_server: 'smtp.com'
+                   sender_email: 'noreply@msmsms.com'
+                   send_to: ['user@msmsmsms.com']
+
         KVService:
             backend_uri: 'redis://localhost:6379/4'

@@ -1,4 +1,6 @@
 from datetime import datetime
+import logging
+
 from flask import request, jsonify
 from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
@@ -10,6 +12,9 @@ from moxie_notifications.representations import HALFollowUpRepresentation
 from .representations import HALAlertRepresentation, HALAlertsRepresentation
 from .services import NotificationsService, ANDROID, iOS
 from .domain import Alert
+
+
+logger = logging.getLogger(__name__)
 
 
 class AlertView(ServiceView):
@@ -66,11 +71,12 @@ class PushView(ServiceView):
         if not alert:
             raise BadRequest("Alert '{uuid}' not found".format(uuid=message_json['alert']))
 
-        try:
-            service.add_push(alert, message)
+        errors = service.add_push(alert, message)
+        if errors:
+            logging.error("Error pushing to all providers: %s" % errors)
+            return errors
+        else:
             return 'success'
-        except Exception as err:
-            return err.message
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, result):
@@ -78,7 +84,7 @@ class PushView(ServiceView):
             response = jsonify({'status': 'success'})
             response.status_code = 202      # Accepted
         else:
-            response = jsonify({'status': result})
+            response = jsonify({'status': 'error', 'errors': result})
             response.status_code = 500
         return response
 
