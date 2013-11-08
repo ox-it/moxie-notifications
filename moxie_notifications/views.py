@@ -88,8 +88,12 @@ class AlertsView(ServiceView):
     methods = ['OPTIONS', 'GET']
 
     def handle_request(self):
+        history = request.args.get("history", False)
         service = NotificationsService.from_context()
-        return service.get_all_alerts()
+        if history in ('true', 'True', 't', '1'):
+            return service.get_all_alerts()
+        else:
+            return service.get_active_alerts()
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, alerts):
