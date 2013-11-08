@@ -279,7 +279,7 @@ Endpoint to create and retrieve notifications
             ]
         }
 
-    :query history: display passed alerts (defaults to false)
+    :query history: boolean value ("true", "True", "1", "t") to display all alerts (defaults to false)
 
     :statuscode 200: :http:statuscode:`200`
 
