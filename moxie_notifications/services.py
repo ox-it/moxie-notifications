@@ -13,6 +13,13 @@ iOS = 'iOS'
 
 class NotificationsService(ProviderService):
 
+    def __init__(self, *args, **kwargs):
+        self._users = kwargs.pop('users', {})
+        super(NotificationsService, self).__init__(*args, **kwargs)
+
+    def get_secret(self, api_key):
+        return self._users[api_key]
+
     def register(self, token, platform):
         provider = self.get_provider(platform)
         return provider.add_token(token)
