@@ -5,9 +5,9 @@ from flask import request, jsonify
 from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
 
-from moxie.core.views import accepts
+from moxie.core.views import accepts, ServiceView
 from moxie.core.representations import HAL_JSON, JSON
-from moxie.authentication import HMACView, HMACSignatureMismatch
+from moxie.authentication import HMACView
 from moxie_notifications.domain import FollowUp
 from moxie_notifications.representations import HALFollowUpRepresentation
 from .representations import HALAlertRepresentation, HALAlertsRepresentation
@@ -104,7 +104,7 @@ class PushView(AuthenticatedView):
         return response
 
 
-class AlertsView(AuthenticatedView):
+class AlertsView(ServiceView):
 
     methods = ['OPTIONS', 'GET']
 
@@ -127,14 +127,16 @@ class AlertDetailsView(AuthenticatedView):
     methods = ['GET', 'POST', 'DELETE']
 
     def handle_request(self, ident):
-        super(AlertDetailsView, self).handle_request()
         service = NotificationsService.from_context()
         alert = service.get_alert_by_id(ident)
         if not alert:
             raise NotFound()
         if request.method == "GET":
             return alert
-        elif request.method == "POST":
+
+        # POST and DELETE need to be authenticated
+        super(AlertDetailsView, self).handle_request()
+        if request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
             if not _validate_alert_json(message_json):
                 raise BadRequest("You must pass a JSON document with property 'message'")
@@ -186,7 +188,6 @@ class FollowUpDetailsView(AuthenticatedView):
     methods = ['OPTIONS', 'GET', 'POST', 'DELETE']
 
     def handle_request(self, ident, id):
-        super(FollowUpDetailsView, self).handle_request()
         self.service = NotificationsService.from_context()
         self.alert = self.service.get_alert_by_id(ident)
         if self.alert:
@@ -198,7 +199,10 @@ class FollowUpDetailsView(AuthenticatedView):
 
         if request.method == "GET":
             return self._handle_GET()
-        elif request.method == "POST":
+
+        # POST and DELETE need to be authenticated
+        super(FollowUpDetailsView, self).handle_request()
+        if request.method == "POST":
             return self._handle_POST()
         elif request.method == "DELETE":
             return self._handle_DELETE()
