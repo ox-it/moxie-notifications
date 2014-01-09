@@ -11,7 +11,6 @@ iOS = 'iOS'
 
 
 class NotificationsService(ProviderService):
-    KV_PREFIX = 'notification_'
 
     def register(self, token, platform):
         provider = self.get_provider(platform)
