@@ -138,9 +138,10 @@ class AlertDetailsView(AuthenticatedView):
         super(AlertDetailsView, self).handle_request()
         if request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
-            if not _validate_alert_json(message_json):
-                raise BadRequest("You must pass a JSON document with property 'message'")
-            alert.message = message_json['message']
+            if not message_json:
+                raise BadRequest("You must pass a JSON document with properties to be updated on the alert.")
+            if 'message' in message_json:
+                alert.message = message_json['message']
             if 'fromDate' in message_json:
                 alert.from_date = _str_to_datetime(message_json['fromDate'])
             if 'displayUntil' in message_json:
