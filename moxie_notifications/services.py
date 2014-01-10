@@ -14,6 +14,9 @@ iOS = 'iOS'
 class NotificationsService(ProviderService):
 
     def __init__(self, *args, **kwargs):
+        """Users passed here should be a simple dictionary of
+        apikey, sharedsecret pairs.
+        """
         self._users = kwargs.pop('users', {})
         super(NotificationsService, self).__init__(*args, **kwargs)
 
