@@ -27,4 +27,4 @@ echo
 echo
 echo "$@"
 
-echo $(curl -i -H "X-Moxie-Key: $apikey" -H "Date: $date" -H "X-HMAC-Nonce: $nonce" -H "Authorization: $authorize" -X $method "$@" $url)
+curl -i -H "X-Moxie-Key: $apikey" -H "Date: $date" -H "X-HMAC-Nonce: $nonce" -H "Authorization: $authorize" -X $method "$@" $url
