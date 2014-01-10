@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
 
 from moxie.core.service import ProviderService
@@ -23,7 +24,8 @@ class NotificationsService(ProviderService):
             return None
 
     def get_active_alerts(self):
-        pass
+        now = datetime.now()
+        return Alert.query.filter(Alert.from_date <= now).filter(Alert.display_until >= now)
 
     def get_all_alerts(self):
         return Alert.query.all()

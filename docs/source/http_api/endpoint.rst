@@ -1,6 +1,14 @@
 Endpoint
 ========
 
+Format
+------
+
+Dates are expressed as YYYY-mm-DDTHH:mm:ss (e.g. ``2013-11-08T16:00:00``)
+
+Methods
+-------
+
 Endpoint to create and retrieve notifications
 
 .. http:post:: /alert
@@ -29,8 +37,8 @@ Endpoint to create and retrieve notifications
         Location: /alert/{uuid}
 
     :jsonparam string message: the message of the alert
-    :jsonparam date initialDate: (optional) start date of the alert
-    :jsonparam date displayUntil: (optional) end date of the alert
+    :jsonparam date initialDate: (optional) start date of the alert (defaults to current time)
+    :jsonparam date displayUntil: (optional) end date of the alert (defaults to one hour after current time)
 
     :statuscode 201: :http:statuscode:`201`: alert created
     :statuscode 400: :http:statuscode:`400`
@@ -271,7 +279,7 @@ Endpoint to create and retrieve notifications
             ]
         }
 
-    :query history: display passed alerts (defaults to false)
+    :query history: boolean value ("true", "True", "1", "t") to display all alerts (defaults to false)
 
     :statuscode 200: :http:statuscode:`200`
 
