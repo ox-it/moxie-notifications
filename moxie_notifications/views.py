@@ -232,7 +232,7 @@ class FollowUpDetailsView(AuthenticatedView):
             return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
 
 
-class Register(AuthenticatedView):
+class Register(ServiceView):
     methods = ['POST', 'OPTIONS']
 
     platform = None
