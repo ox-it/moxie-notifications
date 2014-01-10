@@ -23,6 +23,10 @@ Endpoint to create and retrieve notifications
 
         POST /alert HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
         Content-Type: application/json
     
         {
@@ -56,6 +60,10 @@ Endpoint to create and retrieve notifications
     
         POST /push HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
         Content-Type: application/json
         
         {
@@ -88,6 +96,10 @@ Endpoint to create and retrieve notifications
 
         POST /alert/X HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
         Content-Type: application/json
     
         {
@@ -125,6 +137,10 @@ Endpoint to create and retrieve notifications
 
         POST /alert/X/followup HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
         Content-Type: application/json
     
         {
@@ -161,6 +177,10 @@ Endpoint to create and retrieve notifications
 
         POST /alert/X/followup/1 HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
         Content-Type: application/json
     
         {
@@ -199,6 +219,10 @@ Endpoint to create and retrieve notifications
 
         DELETE /alert/X HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
 
     **Example response**:
     
@@ -225,6 +249,10 @@ Endpoint to create and retrieve notifications
 
         DELETE /alert/X/followup/1 HTTP/1.1
         Host: api.m.ox.ac.uk
+        X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
+        X-HMAC-Nonce: 12642
+        Date: Fri, 10 Jan 2014 11:49:55 GMT
+        Authorization: ccd61eddf0c6be849b13e524c171e4c14a0d571f
 
     **Example response**:
     
