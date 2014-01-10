@@ -23,7 +23,7 @@ date:$date
 x-hmac-nonce:$nonce"
 
 echo "Canonical form:"
-echo $canonical_form
+echo "$canonical_form"
 
 authorize=$(echo -n "$canonical_form" | openssl sha1 -hmac "$secret" | sed 's/^.* //')
 
