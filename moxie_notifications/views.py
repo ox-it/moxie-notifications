@@ -5,8 +5,9 @@ from flask import request, jsonify
 from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
 
-from moxie.core.views import ServiceView, accepts
+from moxie.core.views import accepts, ServiceView
 from moxie.core.representations import HAL_JSON, JSON
+from moxie.authentication import HMACView
 from moxie_notifications.domain import FollowUp
 from moxie_notifications.representations import HALFollowUpRepresentation
 from .representations import HALAlertRepresentation, HALAlertsRepresentation
@@ -17,11 +18,24 @@ from .domain import Alert
 logger = logging.getLogger(__name__)
 
 
-class AlertView(ServiceView):
+class AuthenticatedView(HMACView):
+
+    def handle_request(self):
+        service = NotificationsService.from_context()
+        try:
+            api_key = request.headers['x-moxie-key']
+            secret = service.get_secret(api_key)
+        except KeyError:
+            raise NotFound()
+        self.check_auth(secret)
+
+
+class AlertView(AuthenticatedView):
 
     methods = ['OPTIONS', 'POST']
 
     def handle_request(self):
+        super(AlertView, self).handle_request()
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
         if not _validate_alert_json(message_json):
@@ -47,7 +61,7 @@ class AlertView(ServiceView):
             return response
 
 
-class PushView(ServiceView):
+class PushView(AuthenticatedView):
 
     methods = ['OPTIONS', 'POST']
 
@@ -55,6 +69,7 @@ class PushView(ServiceView):
     MESSAGE_MAX_LENGTH = 250
 
     def handle_request(self):
+        super(PushView, self).handle_request()
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
 
@@ -94,6 +109,7 @@ class AlertsView(ServiceView):
     methods = ['OPTIONS', 'GET']
 
     def handle_request(self):
+        super(AlertsView, self).handle_request()
         history = request.args.get("history", False)
         service = NotificationsService.from_context()
         if history in ('true', 'True', 't', '1'):
@@ -106,7 +122,7 @@ class AlertsView(ServiceView):
         return HALAlertsRepresentation(alerts, request.url_rule.endpoint).as_json()
 
 
-class AlertDetailsView(ServiceView):
+class AlertDetailsView(AuthenticatedView):
 
     methods = ['GET', 'POST', 'DELETE']
 
@@ -117,7 +133,10 @@ class AlertDetailsView(ServiceView):
             raise NotFound()
         if request.method == "GET":
             return alert
-        elif request.method == "POST":
+
+        # POST and DELETE need to be authenticated
+        super(AlertDetailsView, self).handle_request()
+        if request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
             if not _validate_alert_json(message_json):
                 raise BadRequest("You must pass a JSON document with property 'message'")
@@ -142,11 +161,12 @@ class AlertDetailsView(ServiceView):
             return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
 
 
-class AlertAddFollowUpView(ServiceView):
+class AlertAddFollowUpView(AuthenticatedView):
 
     methods = ['OPTIONS', 'POST']
 
     def handle_request(self, ident):
+        super(AlertAddFollowUpView, self).handle_request()
         service = NotificationsService.from_context()
         alert = service.get_alert_by_id(ident)
         if not alert:
@@ -163,7 +183,7 @@ class AlertAddFollowUpView(ServiceView):
         return jsonify({'status': 'created'})
 
 
-class FollowUpDetailsView(ServiceView):
+class FollowUpDetailsView(AuthenticatedView):
 
     methods = ['OPTIONS', 'GET', 'POST', 'DELETE']
 
@@ -179,7 +199,10 @@ class FollowUpDetailsView(ServiceView):
 
         if request.method == "GET":
             return self._handle_GET()
-        elif request.method == "POST":
+
+        # POST and DELETE need to be authenticated
+        super(FollowUpDetailsView, self).handle_request()
+        if request.method == "POST":
             return self._handle_POST()
         elif request.method == "DELETE":
             return self._handle_DELETE()
@@ -216,6 +239,7 @@ class Register(ServiceView):
     post_data_key = None
 
     def handle_request(self):
+        super(Register, self).handle_request()
         notification_service = NotificationsService.from_context()
         data = request.get_json(force=True, silent=True)
         # Handle missing/invalid JSON

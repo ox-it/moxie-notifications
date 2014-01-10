@@ -17,7 +17,10 @@ See `SQLAlchemy documentation <http://docs.sqlalchemy.org/en/rel_0_8/core/engine
 NotificationsService
 --------------------
 
-There is no configuration required for the ``NotificationsService`` itself. Configuration is instead required for the individual providers themselves.
+``NotificationsService`` is configured with the API key's and shared secrets of users configured to use the notifications.
+
+users
+    Mapping of API keys (chosen however you want) to shared secrets (used by the client to create HMAC requests).
 
 moxie_notifications.providers.gcm.GCMProvider:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -64,6 +67,9 @@ Example Configuration
 
     notifications:
         NotificationsService:
+            users:
+                myuserapikey: 'usersharedsecret'
+                anotheruserapikey: 'secondsharedsecret'
             providers:
               moxie_notifications.providers.gcm.GCMProvider:
                   api_key: 'APIKEY'
