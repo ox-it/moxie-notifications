@@ -266,4 +266,7 @@ def _validate_followup_json(obj):
 
 
 def _str_to_datetime(obj):
-    return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S")
+    try:
+        return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S")
+    except ValueError as e:
+        raise BadRequest("Wrong date value: {msg}".format(msg=e.message))
