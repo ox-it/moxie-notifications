@@ -43,16 +43,19 @@ class FollowUp(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
+    timestamp = db.Column(db.DateTime)
     alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
 
     def __init__(self, message):
         self.message = message
+        self.timestamp = datetime.now()
 
     def __repr__(self):
         return "<FollowUp('{id}')>".format(id=self.id)
 
     def as_dict(self):
-        values = {'message': self.message}
+        values = {'message': self.message,
+                  'timestamp': self.timestamp.isoformat()}
         return values
 
 
@@ -61,12 +64,14 @@ class PushAlert(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
+    timestamp = db.Column(db.DateTime)
     alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
     alert = db.relationship("Alert")
 
     def __init__(self, message, alert):
         self.message = message
         self.alert = alert
+        self.timestamp = datetime.now()
 
     def __repr__(self):
         return "<PushAlert('{id}')>".format(id=self.id)
