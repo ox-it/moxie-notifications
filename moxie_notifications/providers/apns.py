@@ -37,7 +37,7 @@ class APNSProvider(NotificationsProvider):
         return self.session.get_connection(self.push_address,
                                            cert_file=self.cert_file)
 
-    def push_server(self, timeout=None):
+    def push_server(self, timeout=0.5):
         con = self._push_connection()
         return APNs(con, tail_timeout=timeout)
 
