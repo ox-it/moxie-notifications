@@ -67,7 +67,7 @@ class APNSProvider(NotificationsProvider):
                        devices which are not immediately available to receive
                        the push notification.
         """
-        if not device_tokens:
+        if device_tokens is None:
             device_tokens = self._get_all_device_tokens()
 
         logger.info("APNS: Push notification to {0} clients. Message: {1}"
