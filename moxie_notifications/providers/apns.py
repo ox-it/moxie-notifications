@@ -50,8 +50,7 @@ class APNSProvider(NotificationsProvider):
     def _get_all_device_tokens(self):
         return kv_store.smembers(self.provider_set)
 
-    def notify(self, message, alert, device_tokens=None, all_devices=True,
-               expiry=DEFAULT_EXPIRY):
+    def notify(self, message, alert, device_tokens=None, expiry=DEFAULT_EXPIRY):
         """Send a push notification through APNs, this can be to specific
         devices or all devices we have stored in ``self.provider_set``
 
@@ -61,15 +60,14 @@ class APNSProvider(NotificationsProvider):
 
         :param message: User provided string to be pushed to all devices.
         :param alert: Associated alert
-        :param device_tokens: Pass specific device tokens to push to rather
-                              than pushing to all devices.
-        :param all_devices: Boolean if true all devices with tokens in
-                            ``self.provider_set`` will be pushed to.
+        :param device_tokens: Pass specific device tokens to push to. If no
+                              tokens are passed then all devices found in
+                              ``self.provider_set`` will be pushed to.
         :param expiry: How long should APNS keep this message queued for
                        devices which are not immediately available to receive
                        the push notification.
         """
-        if all_devices:
+        if not device_tokens:
             device_tokens = self._get_all_device_tokens()
 
         logger.info("APNS: Push notification to {0} clients. Message: {1}"
