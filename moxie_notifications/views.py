@@ -189,7 +189,7 @@ class FollowUpDetailsView(AuthenticatedView):
     def handle_request(self, ident, id):
         self.service = NotificationsService.from_context()
         self.notification = self.service.get_notification_by_id(ident)
-        if self.alert:
+        if self.notification:
             self.followup = self.service.get_followup_by_id(id)
             if not self.followup:
                 raise NotFound("FollowUp not found")
