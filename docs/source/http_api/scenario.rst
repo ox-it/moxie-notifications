@@ -32,7 +32,7 @@ Create a new notification
 
 
 (Optionally) push the notification to registered devices
--------------------------------------------------
+--------------------------------------------------------
 
 .. http:post:: /push
 
@@ -90,7 +90,7 @@ Add a follow up
 
 
 Update the notification to be displayed until the end of the day
----------------------------------------------------------
+----------------------------------------------------------------
 
 .. http:post:: /notifications/16d4a94fc58111a323437ec363d71f5a
 
