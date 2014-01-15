@@ -72,15 +72,15 @@ class PushView(AuthenticatedView):
         return response
 
 
-class NotificationsView(ServiceView):
+class NotificationsView(AuthenticatedView):
 
     methods = ['OPTIONS', 'GET', 'POST']
 
     def handle_request(self):
-        super(NotificationsView, self).handle_request()
         if request.method == 'GET':
             return self._handle_GET()
         elif request.method == 'POST':
+            super(NotificationsView, self).handle_request()
             return self._handle_POST()
 
     def _handle_GET(self):
