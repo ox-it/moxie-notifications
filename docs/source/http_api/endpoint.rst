@@ -11,6 +11,13 @@ Methods
 
 Endpoint to create and retrieve notifications
 
+.. warning::
+
+    All the routes below refer to the root of the module.
+    The identifier of the module should be concatenated (e.g. route / should be
+    concatenated with the name of the module, /notifications).
+
+
 .. http:post:: /
 
     Create a new notification
