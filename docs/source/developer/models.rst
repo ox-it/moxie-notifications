@@ -12,6 +12,7 @@ Notification
 * ``timestamp``: date when the notification has been created
 * ``expires``: notification valid until given date
 * ``url``: (optional) url to attach to the notification
+* ``label``: qualifier of the notification (e.g. "flood", "security")
 
 **Relations**:
 

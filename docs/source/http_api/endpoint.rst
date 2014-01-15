@@ -51,6 +51,7 @@ Endpoint to create and retrieve notifications
     :jsonparam date timestamp: (optional) start date of the notification (defaults to current time)
     :jsonparam date expires: (optional) end date of the notification (defaults to one hour after current time)
     :jsonparam string url: (optional) url describing the notification
+    :jsonparam string label: (optional) label describing the notification
 
     :statuscode 201: :http:statuscode:`201`: notification created
     :statuscode 400: :http:statuscode:`400`
@@ -128,6 +129,7 @@ Endpoint to create and retrieve notifications
     :jsonparam date timestamp: (optional) start date of the notification
     :jsonparam date expires: (optional) end date of the notification
     :jsonparam string url: (optional) url describing the notification
+    :jsonparam string label: (optional) label describing the notification
 
     :statuscode 200: :http:statuscode:`200`: update applied correctly
     :statuscode 400: :http:statuscode:`400`

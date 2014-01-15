@@ -10,12 +10,14 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String, index=True, unique=True)
     message = db.Column(db.String)
+    label = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
     expires = db.Column(db.DateTime)
     url = db.Column(db.String)
     followups = db.relationship("FollowUp")
 
-    def __init__(self, message, ident=None, timestamp=None, expires=None, url=None):
+    def __init__(self, message, ident=None, timestamp=None, expires=None,
+                 url=None, label=None):
         if not ident:
             self.uuid = str(uuid.uuid4())
         else:
@@ -24,6 +26,7 @@ class Notification(db.Model):
         self.timestamp = timestamp or datetime.now()
         self.expires = expires or datetime.now() + timedelta(hours=1)
         self.url = url
+        self.label = label
 
     def __repr__(self):
         return "<Notification('{uuid}')>".format(uuid=self.uuid)
@@ -38,6 +41,8 @@ class Notification(db.Model):
             values['expires'] = self.expires.isoformat()
         if self.url:
             values['url'] = self.url
+        if self.label:
+            values['label'] = self.label
         return values
 
 
