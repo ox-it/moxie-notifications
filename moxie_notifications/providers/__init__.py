@@ -22,5 +22,5 @@ class DummyNotificationsProvider(NotificationsProvider):
         # do not register any device with this provider
         return False
 
-    def notify(self, message, alert):
+    def notify(self, message, notification):
         print message

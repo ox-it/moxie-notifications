@@ -9,14 +9,14 @@ logger = logging.getLogger(__file__)
 
 class EmailNotificationsProvider(NotificationsProvider):
 
-    def __init__(self, smtp_server, sender_email, send_to, email_subject='Push alert'):
+    def __init__(self, smtp_server, sender_email, send_to, email_subject='Push notification'):
         self.smtp_server = smtp_server
         self.sender_email = sender_email
         self.send_to = send_to
         self.email_subject = email_subject
 
-    def notify(self, message, alert):
-        msg = self._get_email(message, alert)
+    def notify(self, message, notification):
+        msg = self._get_email(message, notification)
 
         try:
             s = smtplib.SMTP(self.smtp_server)
@@ -28,8 +28,8 @@ class EmailNotificationsProvider(NotificationsProvider):
         else:
             return True
 
-    def _get_email(self, message, alert):
-        msg_text = self._get_email_text(message, alert)
+    def _get_email(self, message, notification):
+        msg_text = self._get_email_text(message, notification)
         msg = MIMEText(msg_text)
 
         msg['Subject'] = self.email_subject
@@ -37,19 +37,19 @@ class EmailNotificationsProvider(NotificationsProvider):
         msg['To'] = ", ".join(self.send_to)
         return msg
 
-    def _get_email_text(self, message, alert):
+    def _get_email_text(self, message, notification):
         """
         Prepare the text of the email message
         :param message: Message domain object
         :return: string with message
         """
-        return """New push alert!
+        return """New push notification!
 
-Message of the push alert: '{push}'
+Message of the push notification: '{push}'
 
-Alert ID: {alert_id}
+Notification ID: {notification_id}
 
-Alert message: {alert_message}
+Notification message: {notification_message}
         """.format(push=message,
-                   alert_id=alert.uuid,
-                   alert_message=alert.message)
+                   notification_id=notification.uuid,
+                   notification_message=notification.message)
