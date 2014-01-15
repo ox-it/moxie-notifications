@@ -56,7 +56,7 @@ class APNSProvider(NotificationsProvider):
 
         APNs queues push notifications as devices become available unlike GCM
         This means you attach an expiry on each push notification. So if a push
-        notification becomes irrelevant it has can be considered expired.
+        notification becomes irrelevant it can be considered expired.
 
         :param message: User provided string to be pushed to all devices.
         :param alert: Associated alert
@@ -81,7 +81,7 @@ class APNSProvider(NotificationsProvider):
 
         server = self.push_server()
         result = server.send(message)
-        self.log_result(result)
+        self.handle_result(result)
         # Retry if we have some failures
         if result.needs_retry():
             message = result.retry()
@@ -90,13 +90,18 @@ class APNSProvider(NotificationsProvider):
             result = server.send(message)
             self.log_result(result)
 
-    def log_result(self, result):
-        """Logs the errors from APNS"""
+    def handle_result(self, result):
+        """Logs the errors from APNS
+
+        Removes any tokens which cause failures.
+        """
         # Check failures. Check codes in APNs reference docs.
         for token, reason in result.failed.items():
             code, errmsg = reason
             logger.warning("APNs: Device failed: {0}, reason: {1}".format(
                 token, errmsg))
+            self.remove_token(token)
+            logger.info("APNs: Removed token: {0}".format(token))
         # Check failures not related to devices.
         for code, errmsg in result.errors:
             logger.warning("APNs: Error: {0}".format(errmsg))
