@@ -16,8 +16,7 @@ class Notification(db.Model):
 
     def __init__(self, message, ident=None, timestamp=None, expires=None):
         if not ident:
-            alert_uuid = uuid.uuid4()
-            self.uuid = str(alert_uuid)
+            self.uuid = str(uuid.uuid4())
         else:
             self.uuid = ident
         self.message = message
