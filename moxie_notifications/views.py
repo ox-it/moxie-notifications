@@ -97,10 +97,10 @@ class NotificationsView(AuthenticatedView):
         if not _validate_notification_json(message_json):
             raise BadRequest("You must pass a JSON document with property 'message'")
         notification = Notification(message_json['message'])
-        if 'fromDate' in message_json:
-            notification.from_date = _str_to_datetime(message_json['fromDate'])
-        if 'displayUntil' in message_json:
-            notification.display_until = _str_to_datetime(message_json['displayUntil'])
+        if 'timestamp' in message_json:
+            notification.timestamp = _str_to_datetime(message_json['timestamp'])
+        if 'expires' in message_json:
+            notification.expires = _str_to_datetime(message_json['expires'])
         result = service.add_notification(notification)
         return 'notification', result
 
@@ -140,10 +140,10 @@ class NotificationDetailsView(AuthenticatedView):
                 raise BadRequest("You must pass a JSON document with properties to be updated on the notification.")
             if 'message' in message_json:
                 notification.message = message_json['message']
-            if 'fromDate' in message_json:
-                notification.from_date = _str_to_datetime(message_json['fromDate'])
-            if 'displayUntil' in message_json:
-                notification.display_until = _str_to_datetime(message_json['displayUntil'])
+            if 'timestamp' in message_json:
+                notification.timestamp = _str_to_datetime(message_json['timestamp'])
+            if 'expires' in message_json:
+                notification.expires = _str_to_datetime(message_json['expires'])
             notification = service.update_notification(notification)
             return notification
         elif request.method == "DELETE":
