@@ -88,7 +88,7 @@ class APNSProvider(NotificationsProvider):
             logger.info("APNs: Retrying for {0} device tokens."
                         .format(len(message.tokens)))
             result = server.send(message)
-            self.log_result(result)
+            self.handle_result(result)
 
     def handle_result(self, result):
         """Logs the errors from APNS
