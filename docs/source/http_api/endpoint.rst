@@ -11,9 +11,9 @@ Methods
 
 Endpoint to create and retrieve notifications
 
-.. http:post:: /alert
+.. http:post:: /
 
-    Create a new alert
+    Create a new notification
     
     Requires authentication
     
@@ -21,7 +21,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        POST /alert HTTP/1.1
+        POST /notifications HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -38,19 +38,19 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
 
         HTTP/1.1 201 Created
-        Location: /alert/{uuid}
+        Location: /notifications/{uuid}
 
-    :jsonparam string message: the message of the alert
-    :jsonparam date initialDate: (optional) start date of the alert (defaults to current time)
-    :jsonparam date displayUntil: (optional) end date of the alert (defaults to one hour after current time)
+    :jsonparam string message: the message of the notification
+    :jsonparam date timestamp: (optional) start date of the notification (defaults to current time)
+    :jsonparam date expires: (optional) end date of the notification (defaults to one hour after current time)
 
-    :statuscode 201: :http:statuscode:`201`: alert created
+    :statuscode 201: :http:statuscode:`201`: notification created
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
 
 .. http:post:: /push
 
-    Request an alert to be pushed to registered devices
+    Request a notification to be pushed to registered devices
     
     Requires authentication
     
@@ -67,7 +67,7 @@ Endpoint to create and retrieve notifications
         Content-Type: application/json
         
         {
-            "alert": "{uuid}",
+            "notification": "{uuid}",
             "message": "Bomb threat at X, avoid the area"
         }
         
@@ -77,16 +77,16 @@ Endpoint to create and retrieve notifications
     
         HTTP/1.1 202 Accepted
         
-    :jsonparam string alert: unique identifier of the alert
-    :jsonparam string message: message of the push alert
+    :jsonparam string notification: unique identifier of the notification
+    :jsonparam string message: message of the push notification
         
     :statuscode 202: :http:statuscode:`202`: push request queued
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
 
-.. http:post:: /alert/(string:uuid)
+.. http:post:: /(string:uuid)
 
-    Update an alert
+    Update a notification
     
     Requires authentication
 
@@ -94,7 +94,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        POST /alert/X HTTP/1.1
+        POST /notifications/X HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -111,23 +111,23 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
 
         HTTP/1.1 200 OK
-        Location: /alert/{uuid}
+        Location: /notifications/{uuid}
 
-    :param uuid: unique identifier of the alert
+    :param uuid: unique identifier of the notification
     :type uuid: string
 
-    :jsonparam string message: the message of the alert
-    :jsonparam date initialDate: (optional) start date of the alert
-    :jsonparam date displayUntil: (optional) end date of the alert
+    :jsonparam string message: the message of the notification
+    :jsonparam date timestamp: (optional) start date of the notification
+    :jsonparam date expires: (optional) end date of the notification
 
     :statuscode 200: :http:statuscode:`200`: update applied correctly
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
-    :statuscode 404: :http:statuscode:`404`: alert not found
+    :statuscode 404: :http:statuscode:`404`: notification not found
 
-.. http:post:: /alert/(string:uuid)/followup
+.. http:post:: /(string:uuid)/followup
 
-    Add a follow up to an existing alert
+    Add a follow up to an existing notification
     
     Requires authentication
     
@@ -135,7 +135,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        POST /alert/X/followup HTTP/1.1
+        POST /notifications/X/followup HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -152,9 +152,9 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
 
         HTTP/1.1 201 Created
-        Location: /alert/X/followup/1
+        Location: /notifications/X/followup/1
 
-    :param uuid: unique identifier of the alert
+    :param uuid: unique identifier of the notification
     :type uuid: string
 
     :jsonparam string message: the message of the follow up
@@ -163,9 +163,9 @@ Endpoint to create and retrieve notifications
     :statuscode 201: :http:statuscode:`201`: followup created
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
-    :statuscode 404: :http:statuscode:`404`: alert not found
+    :statuscode 404: :http:statuscode:`404`: notification not found
 
-.. http:post:: /alert/(string:uuid)/followup/(string:id)
+.. http:post:: /(string:uuid)/followup/(string:id)
 
     Update a follow up
     
@@ -175,7 +175,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        POST /alert/X/followup/1 HTTP/1.1
+        POST /notifications/X/followup/1 HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -192,24 +192,24 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
 
         HTTP/1.1 200 OK
-        Location: /alert/{uuid}/followup/1
+        Location: /notifications/{uuid}/followup/1
 
-    :param uuid: unique identifier of the alert
+    :param uuid: unique identifier of the notification
     :type uuid: string
     :param id: identifier of the followup
     :type id: string
 
     :jsonparam string message: the message of the follow up
-    :jsonparam date initialDate: (optional) date of the follow up
+    :jsonparam date timestamp: (optional) date of the follow up
 
     :statuscode 200: :http:statuscode:`200`: update applied correctly
     :statuscode 400: :http:statuscode:`400`
     :statuscode 401: :http:statuscode:`401`
-    :statuscode 404: :http:statuscode:`404`: alert not found or followup not found
+    :statuscode 404: :http:statuscode:`404`: notification not found or followup not found
 
-.. http:delete:: /alert/(string:uuid)
+.. http:delete:: /(string:uuid)
 
-    Delete an alert
+    Delete a notification
     
     Requires authentication
 
@@ -217,7 +217,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        DELETE /alert/X HTTP/1.1
+        DELETE /notifications/X HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -230,14 +230,14 @@ Endpoint to create and retrieve notifications
 
         HTTP/1.1 200 OK
 
-    :param uuid: unique identifier of the alert
+    :param uuid: unique identifier of the notification
     :type uuid: string
 
-    :statuscode 200: :http:statuscode:`200`: alert deleted
+    :statuscode 200: :http:statuscode:`200`: notification deleted
     :statuscode 401: :http:statuscode:`401`
-    :statuscode 404: :http:statuscode:`404`: alert not found
+    :statuscode 404: :http:statuscode:`404`: notification not found
 
-.. http:delete:: /alert/(string:uuid)/followup/(string:id)
+.. http:delete:: /(string:uuid)/followup/(string:id)
 
     Delete a follow up
     
@@ -247,7 +247,7 @@ Endpoint to create and retrieve notifications
     
     .. sourcecode:: http
 
-        DELETE /alert/X/followup/1 HTTP/1.1
+        DELETE /notifications/X/followup/1 HTTP/1.1
         Host: api.m.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -260,24 +260,24 @@ Endpoint to create and retrieve notifications
 
         HTTP/1.1 200 OK
 
-    :param uuid: unique identifier of the alert
+    :param uuid: unique identifier of the notification
     :type uuid: string
     :param id: identifier of the follow up
     :type id: string
 
     :statuscode 200: :http:statuscode:`200`: follow up deleted
     :statuscode 401: :http:statuscode:`401`
-    :statuscode 404: :http:statuscode:`404`: alert not found or follow up not found
+    :statuscode 404: :http:statuscode:`404`: notification not found or follow up not found
 
-.. http:get:: /alerts
+.. http:get:: /
 
-    Get ongoing alerts
+    Get ongoing notifications
 
     **Example request**:
     
     .. sourcecode:: http
 
-        GET /alerts HTTP/1.1
+        GET /notifications HTTP/1.1
         Host: api.m.ox.ac.uk
         Accept: application/json
 
@@ -289,12 +289,12 @@ Endpoint to create and retrieve notifications
         Content-Type: application/json
         
         {
-            "alerts": [
+            "notifications": [
                 {
                     "uuid": "X",
                     "timestamp": "2013-02-08T12:30",
                     "message": "Bomb threat at X",
-                    "displayUntil": "2013-02-08:16:00",
+                    "expires": "2013-02-08:16:00",
                     "followups": [
                         {
                             "timestamp": "2013-02-08T13:30",
@@ -307,19 +307,19 @@ Endpoint to create and retrieve notifications
             ]
         }
 
-    :query history: boolean value ("true", "True", "1", "t") to display all alerts (defaults to false)
+    :query history: boolean value ("true", "True", "1", "t") to display all notifications (defaults to false)
 
     :statuscode 200: :http:statuscode:`200`
 
-.. http:get:: /alert/(string:uuid)
+.. http:get:: /(string:uuid)
 
-    Get an alert
+    Get a notification
 
     **Example request**:
     
     .. sourcecode:: http
 
-        GET /alert/X HTTP/1.1
+        GET /notifications/X HTTP/1.1
         Host: api.m.ox.ac.uk
         Accept: application/json
 
@@ -334,7 +334,7 @@ Endpoint to create and retrieve notifications
             "uuid": "X",
             "timestamp": "2013-02-08T12:30",
             "message": "Bomb threat at X,
-            "displayUntil": "2013-02-08:16:00",
+            "expires": "2013-02-08:16:00",
             "followups": [
                 {
                     "timestamp": "2013-02-08T13:30",
@@ -346,5 +346,5 @@ Endpoint to create and retrieve notifications
         }
         
     :statuscode 200: :http:statuscode:`200`
-    :statuscode 404: :http:statuscode:`404`: alert not found
+    :statuscode 404: :http:statuscode:`404`: notification not found
     

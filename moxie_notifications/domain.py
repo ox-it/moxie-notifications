@@ -4,37 +4,37 @@ from datetime import datetime, timedelta
 from moxie.core.db import db
 
 
-class Alert(db.Model):
-    __tablename__ = 'alerts'
+class Notification(db.Model):
+    __tablename__ = 'notifications'
 
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String, index=True, unique=True)
     message = db.Column(db.String)
-    from_date = db.Column(db.DateTime)
-    display_until = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime)
+    expires = db.Column(db.DateTime)
     followups = db.relationship("FollowUp")
 
-    def __init__(self, message, ident=None, from_date=None, display_until=None):
+    def __init__(self, message, ident=None, timestamp=None, expires=None):
         if not ident:
             alert_uuid = uuid.uuid4()
             self.uuid = str(alert_uuid)
         else:
             self.uuid = ident
         self.message = message
-        self.from_date = from_date or datetime.now()
-        self.display_until = display_until or datetime.now() + timedelta(hours=1)
+        self.timestamp = timestamp or datetime.now()
+        self.expires = expires or datetime.now() + timedelta(hours=1)
 
     def __repr__(self):
-        return "<Alert('{uuid}')>".format(uuid=self.uuid)
+        return "<Notification('{uuid}')>".format(uuid=self.uuid)
 
     def as_dict(self):
         values = {'message': self.message}
         if self.uuid:
             values['ident'] = self.uuid
-        if self.from_date:
-            values['fromDate'] = self.from_date.isoformat()
-        if self.display_until:
-            values['displayUntil'] = self.display_until.isoformat()
+        if self.timestamp:
+            values['timestamp'] = self.timestamp.isoformat()
+        if self.expires:
+            values['expires'] = self.expires.isoformat()
         return values
 
 
@@ -44,7 +44,7 @@ class FollowUp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
-    alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
+    notification_id = db.Column(db.Integer, db.ForeignKey('notifications.id'))
 
     def __init__(self, message):
         self.message = message
@@ -59,19 +59,19 @@ class FollowUp(db.Model):
         return values
 
 
-class PushAlert(db.Model):
-    __tablename__ = 'pushalerts'
+class PushNotification(db.Model):
+    __tablename__ = 'pushnotifications'
 
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
-    alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'))
-    alert = db.relationship("Alert")
+    notification_id = db.Column(db.Integer, db.ForeignKey('notifications.id'))
+    notification = db.relationship("Notification")
 
-    def __init__(self, message, alert):
+    def __init__(self, message, notification):
         self.message = message
-        self.alert = alert
+        self.notification = notification
         self.timestamp = datetime.now()
 
     def __repr__(self):
-        return "<PushAlert('{id}')>".format(id=self.id)
+        return "<PushNotification('{id}')>".format(id=self.id)

@@ -1,16 +1,16 @@
 Models
 ======
 
-An ``alert`` is the top-level object which MAY contain a number of ``followup``.
+A ``notification`` is the top-level object which MAY contain a number of ``followup``.
 
-Alert
------
+Notification
+------------
 
 **Properties**:
 
-* ``message``: main content of the alert
-* ``initialDate``: date when the alert has been created
-* ``displayUntil``: alert valid until given date
+* ``message``: main content of the notification
+* ``timestamp``: date when the notification has been created
+* ``expires``: notification valid until given date
 
 **Relations**:
 
@@ -26,16 +26,15 @@ Follow up
 
 **Relations**:
 
-* ``alert``: parent alert of the follow up
+* ``notification``: parent notification of the follow up
 
-Push
-----
+Push notification
+-----------------
 
 **Properties**:
 
-* ``message``: message of the push alert (restricted to X characters)
+* ``message``: message of the push notification (restricted to X characters)
 
 **Relations**:
 
-* ``alert``: 
-
+* ``notification``: related notification for this push notification

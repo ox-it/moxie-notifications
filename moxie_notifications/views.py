@@ -4,15 +4,14 @@ import logging
 from flask import request, jsonify
 from flask.helpers import url_for
 from moxie.core.exceptions import NotFound, BadRequest
-
 from moxie.core.views import accepts, ServiceView
 from moxie.core.representations import HAL_JSON, JSON
 from moxie.authentication import HMACView
-from moxie_notifications.domain import FollowUp
-from moxie_notifications.representations import HALFollowUpRepresentation
-from .representations import HALAlertRepresentation, HALAlertsRepresentation
-from .services import NotificationsService, ANDROID, iOS
-from .domain import Alert
+
+from moxie_notifications.domain import FollowUp, Notification
+from moxie_notifications.services import NotificationsService, ANDROID, iOS
+from moxie_notifications.representations import (HALFollowUpRepresentation, HALNotificationRepresentation,
+                                                 HALNotificationsRepresentation)
 
 
 logger = logging.getLogger(__name__)
@@ -30,37 +29,6 @@ class AuthenticatedView(HMACView):
         self.check_auth(secret)
 
 
-class AlertView(AuthenticatedView):
-
-    methods = ['OPTIONS', 'POST']
-
-    def handle_request(self):
-        super(AlertView, self).handle_request()
-        service = NotificationsService.from_context()
-        message_json = request.get_json(force=True, silent=True, cache=True)
-        if not _validate_alert_json(message_json):
-            raise BadRequest("You must pass a JSON document with property 'message'")
-        alert = Alert(message_json['message'])
-        if 'fromDate' in message_json:
-            alert.from_date = _str_to_datetime(message_json['fromDate'])
-        if 'displayUntil' in message_json:
-            alert.display_until = _str_to_datetime(message_json['displayUntil'])
-        result = service.add_alert(alert)
-        return result
-
-    @accepts(JSON, HAL_JSON)
-    def as_json(self, alert):
-        if alert:
-            response = jsonify({'status': 'created'})
-            response.headers.add('Location', url_for('notifications.alert_details', ident=alert.uuid))
-            response.status_code = 201
-            return response
-        else:
-            response = jsonify({'status': 'error'})
-            response.status_code = 500
-            return response
-
-
 class PushView(AuthenticatedView):
 
     methods = ['OPTIONS', 'POST']
@@ -73,8 +41,8 @@ class PushView(AuthenticatedView):
         service = NotificationsService.from_context()
         message_json = request.get_json(force=True, silent=True, cache=True)
 
-        if not message_json or 'alert' not in message_json or 'message' not in message_json:
-            raise BadRequest("You must pass a JSON document with properties 'alert' and 'message'")
+        if not message_json or 'notification' not in message_json or 'message' not in message_json:
+            raise BadRequest("You must pass a JSON document with properties 'notification' and 'message'")
 
         message = message_json['message'].strip()
         message_len = len(message)
@@ -82,11 +50,11 @@ class PushView(AuthenticatedView):
             raise BadRequest("'message' must be between {min} and {max} characters".format(min=self.MESSAGE_MIN_LENGTH,
                                                                                            max=self.MESSAGE_MAX_LENGTH))
 
-        alert = service.get_alert_by_id(message_json['alert'])
-        if not alert:
-            raise BadRequest("Alert '{uuid}' not found".format(uuid=message_json['alert']))
+        notification = service.get_notification_by_id(message_json['notification'])
+        if not notification:
+            raise BadRequest("Notification '{uuid}' not found".format(uuid=message_json['notification']))
 
-        errors = service.add_push(alert, message)
+        errors = service.add_push(notification, message)
         if errors:
             logging.error("Error pushing to all providers: %s" % errors)
             return errors
@@ -104,52 +72,82 @@ class PushView(AuthenticatedView):
         return response
 
 
-class AlertsView(ServiceView):
+class NotificationsView(ServiceView):
 
-    methods = ['OPTIONS', 'GET']
+    methods = ['OPTIONS', 'GET', 'POST']
 
     def handle_request(self):
-        super(AlertsView, self).handle_request()
+        super(NotificationsView, self).handle_request()
+        if request.method == 'GET':
+            return self._handle_GET()
+        elif request.method == 'POST':
+            return self._handle_POST()
+
+    def _handle_GET(self):
         history = request.args.get("history", False)
         service = NotificationsService.from_context()
         if history in ('true', 'True', 't', '1'):
-            return service.get_all_alerts()
+            return 'notifications', service.get_all_notifications()
         else:
-            return service.get_active_alerts()
+            return 'notifications', service.get_active_notifications()
+
+    def _handle_POST(self):
+        service = NotificationsService.from_context()
+        message_json = request.get_json(force=True, silent=True, cache=True)
+        if not _validate_notification_json(message_json):
+            raise BadRequest("You must pass a JSON document with property 'message'")
+        notification = Notification(message_json['message'])
+        if 'fromDate' in message_json:
+            notification.from_date = _str_to_datetime(message_json['fromDate'])
+        if 'displayUntil' in message_json:
+            notification.display_until = _str_to_datetime(message_json['displayUntil'])
+        result = service.add_notification(notification)
+        return 'notification', result
 
     @accepts(JSON, HAL_JSON)
-    def as_json(self, alerts):
-        return HALAlertsRepresentation(alerts, request.url_rule.endpoint).as_json()
+    def as_json(self, result):
+        if result[0] == 'notifications':
+            return HALNotificationsRepresentation(result[1], request.url_rule.endpoint).as_json()
+        elif result[0] == 'notification':
+            if result[1]:
+                response = jsonify({'status': 'created'})
+                response.headers.add('Location', url_for('notifications.notification_details', ident=result[1].uuid))
+                response.status_code = 201
+                return response
+            else:
+                response = jsonify({'status': 'error'})
+                response.status_code = 500
+                return response
 
 
-class AlertDetailsView(AuthenticatedView):
+class NotificationDetailsView(AuthenticatedView):
 
     methods = ['GET', 'POST', 'DELETE']
 
     def handle_request(self, ident):
         service = NotificationsService.from_context()
-        alert = service.get_alert_by_id(ident)
-        if not alert:
+        notification = service.get_notification_by_id(ident)
+        if not notification:
             raise NotFound()
         if request.method == "GET":
-            return alert
+            return notification
 
         # POST and DELETE need to be authenticated
-        super(AlertDetailsView, self).handle_request()
+        super(NotificationDetailsView, self).handle_request()
         if request.method == "POST":
             message_json = request.get_json(force=True, silent=True)
             if not message_json:
-                raise BadRequest("You must pass a JSON document with properties to be updated on the alert.")
+                raise BadRequest("You must pass a JSON document with properties to be updated on the notification.")
             if 'message' in message_json:
-                alert.message = message_json['message']
+                notification.message = message_json['message']
             if 'fromDate' in message_json:
-                alert.from_date = _str_to_datetime(message_json['fromDate'])
+                notification.from_date = _str_to_datetime(message_json['fromDate'])
             if 'displayUntil' in message_json:
-                alert.display_until = _str_to_datetime(message_json['displayUntil'])
-            alert = service.update_alert(alert)
-            return alert
+                notification.display_until = _str_to_datetime(message_json['displayUntil'])
+            notification = service.update_notification(notification)
+            return notification
         elif request.method == "DELETE":
-            service.delete_alert(alert)
+            service.delete_notification(notification)
             return "deleted"
         else:
             raise BadRequest("Method not suitable (allowed: {methods})".format(methods=','.join(self.METHODS)))
@@ -159,24 +157,24 @@ class AlertDetailsView(AuthenticatedView):
         if result == "deleted":
             return jsonify({'status': 'deleted'})
         else:
-            return HALAlertRepresentation(result, request.url_rule.endpoint).as_json()
+            return HALNotificationRepresentation(result, request.url_rule.endpoint).as_json()
 
 
-class AlertAddFollowUpView(AuthenticatedView):
+class NotificationAddFollowUpView(AuthenticatedView):
 
     methods = ['OPTIONS', 'POST']
 
     def handle_request(self, ident):
-        super(AlertAddFollowUpView, self).handle_request()
+        super(NotificationAddFollowUpView, self).handle_request()
         service = NotificationsService.from_context()
-        alert = service.get_alert_by_id(ident)
-        if not alert:
-            raise NotFound("Alert not found")
+        notification = service.get_notification_by_id(ident)
+        if not notification:
+            raise NotFound("Notification not found")
         message_json = request.get_json(force=True, silent=True)
         if not _validate_followup_json(message_json):
             raise BadRequest("You must pass a JSON document with property 'message'")
         fu = FollowUp(message_json['message'])
-        service.add_followup(alert, fu)
+        service.add_followup(notification, fu)
         return True
 
     @accepts(JSON, HAL_JSON)
@@ -190,13 +188,13 @@ class FollowUpDetailsView(AuthenticatedView):
 
     def handle_request(self, ident, id):
         self.service = NotificationsService.from_context()
-        self.alert = self.service.get_alert_by_id(ident)
+        self.notification = self.service.get_notification_by_id(ident)
         if self.alert:
             self.followup = self.service.get_followup_by_id(id)
             if not self.followup:
                 raise NotFound("FollowUp not found")
         else:
-            raise NotFound("Alert not found")
+            raise NotFound("Notification not found")
 
         if request.method == "GET":
             return self._handle_GET()
@@ -230,7 +228,7 @@ class FollowUpDetailsView(AuthenticatedView):
         if response == "deleted":
             return jsonify({'status': 'deleted'})
         else:
-            return HALFollowUpRepresentation(response, self.alert, request.url_rule.endpoint).as_json()
+            return HALFollowUpRepresentation(response, self.notification, request.url_rule.endpoint).as_json()
 
 
 class Register(ServiceView):
@@ -278,7 +276,7 @@ class RegisterAPNS(Register):
     post_data_key = 'device_token'
 
 
-def _validate_alert_json(obj):
+def _validate_notification_json(obj):
     if not obj or 'message' not in obj:
         return False
     return True
