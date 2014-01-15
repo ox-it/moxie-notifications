@@ -15,8 +15,8 @@ DEFAULT_EXPIRY = timedelta(hours=2)
 class APNSProvider(NotificationsProvider):
     provider_set = 'apns-device-tokens'
 
-    def __init__(self, cert_file, push_address="push_production",
-                 feedback_address="feedback_production"):
+    def __init__(self, cert_file, push_address="push_sandbox",
+                 feedback_address="feedback_sandbox"):
         self.cert_file = cert_file
         self.push_address = push_address
         self.feedback_address = feedback_address
