@@ -11,6 +11,7 @@ Notification
 * ``message``: main content of the notification
 * ``timestamp``: date when the notification has been created
 * ``expires``: notification valid until given date
+* ``url``: (optional) url to attach to the notification
 
 **Relations**:
 

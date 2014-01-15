@@ -101,6 +101,8 @@ class NotificationsView(AuthenticatedView):
             notification.timestamp = _str_to_datetime(message_json['timestamp'])
         if 'expires' in message_json:
             notification.expires = _str_to_datetime(message_json['expires'])
+        if 'url' in message_json:
+            notification.url = message_json['url']
         result = service.add_notification(notification)
         return 'notification', result
 
@@ -144,6 +146,8 @@ class NotificationDetailsView(AuthenticatedView):
                 notification.timestamp = _str_to_datetime(message_json['timestamp'])
             if 'expires' in message_json:
                 notification.expires = _str_to_datetime(message_json['expires'])
+            if 'url' in message_json:
+                notification.url = message_json['url']
             notification = service.update_notification(notification)
             return notification
         elif request.method == "DELETE":
