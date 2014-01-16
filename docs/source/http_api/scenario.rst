@@ -1,16 +1,16 @@
-Typical scenario when using the API to create an alert
-======================================================
+Typical scenario when using the API to create a notification
+============================================================
 
-Create a new alert
-------------------
+Create a new notification
+-------------------------
 
-.. http:post:: /alert
+.. http:post:: /notifications
 
     **Request**:
     
     .. sourcecode:: http
 
-        POST /alert HTTP/1.1
+        POST /notifications HTTP/1.1
         Host: api.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -20,7 +20,7 @@ Create a new alert
     
         {
             "message": "Bomb threat at X",
-            "displayUntil": "2013-11-08T16:00:00",
+            "expires": "2013-11-08T16:00:00",
         }
 
     **Response**:
@@ -28,11 +28,11 @@ Create a new alert
     .. sourcecode:: http
 
         HTTP/1.1 201 Created
-        Location: /alert/16d4a94fc58111a323437ec363d71f5a
+        Location: /notifications/16d4a94fc58111a323437ec363d71f5a
 
 
-(Optionally) push the alert to registered devices
--------------------------------------------------
+(Optionally) push the notification to registered devices
+--------------------------------------------------------
 
 .. http:post:: /push
 
@@ -49,7 +49,7 @@ Create a new alert
         Content-Type: application/json
         
         {
-            "alert": "16d4a94fc58111a323437ec363d71f5a",
+            "notification": "16d4a94fc58111a323437ec363d71f5a",
             "message": "Bomb threat at X, avoid the area"
         }
     
@@ -63,13 +63,13 @@ Create a new alert
 Add a follow up
 ---------------
 
-.. http:post:: /alert/16d4a94fc58111a323437ec363d71f5a/followup
+.. http:post:: /notifications/16d4a94fc58111a323437ec363d71f5a/followup
 
     **Request**:
     
     .. sourcecode:: http
 
-        POST /alert/16d4a94fc58111a323437ec363d71f5a/followup HTTP/1.1
+        POST /notifications/16d4a94fc58111a323437ec363d71f5a/followup HTTP/1.1
         Host: api.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -86,19 +86,19 @@ Add a follow up
     .. sourcecode:: http
 
         HTTP/1.1 201 Created
-        Location: /alert/16d4a94fc58111a323437ec363d71f5a/followup/1
+        Location: /notifications/16d4a94fc58111a323437ec363d71f5a/followup/1
 
 
-Update the alert to be displayed until the end of the day
----------------------------------------------------------
+Update the notification to be displayed until the end of the day
+----------------------------------------------------------------
 
-.. http:post:: /alert/16d4a94fc58111a323437ec363d71f5a
+.. http:post:: /notifications/16d4a94fc58111a323437ec363d71f5a
 
     **Request**:
     
     .. sourcecode:: http
 
-        POST /alert/16d4a94fc58111a323437ec363d71f5a HTTP/1.1
+        POST /notifications/16d4a94fc58111a323437ec363d71f5a HTTP/1.1
         Host: api.ox.ac.uk
         X-Moxie-Key: d51459b5-d634-48f7-a77c-d87c77af37f1
         X-HMAC-Nonce: 12642
@@ -107,7 +107,7 @@ Update the alert to be displayed until the end of the day
         Content-Type: application/json
     
         {
-            "displayUntil": "2013-02-08T18:00:00"
+            "expires": "2013-02-08T18:00:00"
         }
 
     **Response**:
@@ -115,4 +115,4 @@ Update the alert to be displayed until the end of the day
     .. sourcecode:: http
 
         HTTP/1.1 200 OK
-        Location: /alert/16d4a94fc58111a323437ec363d71f5a
+        Location: /notifications/16d4a94fc58111a323437ec363d71f5a

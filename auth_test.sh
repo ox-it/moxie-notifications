@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script used for testing the HMAC authentication.
 # Usage: ./auth_test.sh method url apikey sharedsecret [additional options for curl]
-# Example: ./auth_test.sh POST http://localhost:5000/notifications/alert myapikey mysharedsecret -d '{"message": "urgent message!"}'
+# Example: ./auth_test.sh POST http://localhost:5000/notifications/ myapikey mysharedsecret -d '{"message": "urgent message!"}'
 
 # Builds a "canonical form" of the request, then uses openssl to create a HMAC which we
 # capture the hex digest and build a curl request with all the correct headers.

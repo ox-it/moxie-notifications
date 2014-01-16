@@ -47,7 +47,7 @@ class GCMProvider(NotificationsProvider):
                 reg_id))
             kv_store.srem(self.provider_set, reg_id)
 
-    def notify(self, message, alert, registration_ids=[], all_devices=True,
+    def notify(self, message, notification, registration_ids=[], all_devices=True,
             retry_count=0):
         if all_devices:
             registration_ids = self._get_all_registration_ids()

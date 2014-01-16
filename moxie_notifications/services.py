@@ -1,11 +1,10 @@
 from datetime import datetime
-from sqlalchemy.orm.exc import NoResultFound
 
+from sqlalchemy.orm.exc import NoResultFound
 from moxie.core.service import ProviderService
 from moxie.core.db import db
 
-from .domain import Alert
-from moxie_notifications.domain import FollowUp
+from moxie_notifications.domain import Notification, FollowUp
 
 ANDROID = 'android'
 iOS = 'iOS'
@@ -27,44 +26,44 @@ class NotificationsService(ProviderService):
         provider = self.get_provider(platform)
         return provider.add_token(token)
 
-    def get_alert_by_id(self, ident):
+    def get_notification_by_id(self, ident):
         try:
-            return Alert.query.filter(Alert.uuid == ident).one()
+            return Notification.query.filter(Notification.uuid == ident).one()
         except NoResultFound:
             return None
 
-    def get_active_alerts(self):
+    def get_active_notifications(self):
         now = datetime.now()
-        return Alert.query.filter(Alert.from_date <= now).filter(Alert.display_until >= now)
+        return Notification.query.filter(Notification.timestamp <= now).filter(Notification.expires >= now)
 
-    def get_all_alerts(self):
-        return Alert.query.all()
+    def get_all_notifications(self):
+        return Notification.query.all()
 
-    def add_alert(self, alert):
-        return self._db_persist(alert)
+    def add_notification(self, notification):
+        return self._db_persist(notification)
 
-    def update_alert(self, alert):
-        return self._db_merge(alert)
+    def update_notification(self, notification):
+        return self._db_merge(notification)
 
-    def delete_alert(self, alert):
-        self._db_delete(alert)
+    def delete_notification(self, notification):
+        self._db_delete(notification)
 
-    def add_push(self, alert, message):
+    def add_push(self, notification, message):
         # TODO should store the push as well?
         errors = []
         # Each provider can fail independently so collect all possible errors
         for provider in self.providers:
             try:
-                provider.notify(message, alert)
+                provider.notify(message, notification)
             except Exception as err:
                 msg = "%s: %s" % (provider.__class__.__name__, err.message)
                 errors.append(msg)
         return errors
 
-    def add_followup(self, alert, followup):
-        assert alert in db.session
-        alert.followups.append(followup)
-        self._db_merge(alert)
+    def add_followup(self, notification, followup):
+        assert notification in db.session
+        notification.followups.append(followup)
+        self._db_merge(notification)
 
     def get_followup_by_id(self, id):
         try:

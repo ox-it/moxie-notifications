@@ -15,6 +15,6 @@ def retry_gcm(message, registration_ids, retry_count=0):
     with app.blueprint_context(BLUEPRINT_NAME):
         notifications_service = NotificationsService.from_context()
         gcm = notifications_service.get_provider(ANDROID)
-        # gcm.notify doesn't use an alert object so send None
+        # gcm.notify doesn't use a notification object so send None
         gcm.notify(message, None, registration_ids=registration_ids,
-                retry_count=retry_count)
+                   retry_count=retry_count)
