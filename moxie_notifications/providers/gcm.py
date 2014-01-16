@@ -52,6 +52,8 @@ class GCMProvider(NotificationsProvider):
         if all_devices:
             registration_ids = self._get_all_registration_ids()
 
+        logger.info("GCM: Push notification to {0} clients. Message: {1}"
+                    .format(len(registration_ids), message))
         # Return if we don't have any registration_ids to push to
         if not registration_ids:
             logger.warning("GCM: No registration_ids to push to")
