@@ -47,8 +47,8 @@ class GCMProvider(NotificationsProvider):
                 reg_id))
             kv_store.srem(self.provider_set, reg_id)
 
-    def notify(self, message, notification, registration_ids=[], all_devices=True,
-            retry_count=0):
+    def notify(self, message, notification, registration_ids=[],
+               all_devices=True, retry_count=0, title="Mobile Oxford"):
         if all_devices:
             registration_ids = self._get_all_registration_ids()
 
@@ -62,6 +62,7 @@ class GCMProvider(NotificationsProvider):
         # Build basic message
         json_message = JSONMessage(registration_ids,
                 data={
+                    "title": title,
                     "message": message
                 })
         try:
