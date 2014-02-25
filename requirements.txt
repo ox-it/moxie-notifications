@@ -1,5 +1,2 @@
-Sphinx
-sphinxcontrib-httpdomain
-
 gcm-client==0.1.4
 apns-client==0.1.8
