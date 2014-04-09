@@ -113,9 +113,10 @@ class NotificationsView(AuthenticatedView):
         if result[0] == 'notifications':
             return HALNotificationsRepresentation(result[1], request.url_rule.endpoint).as_json()
         elif result[0] == 'notification':
-            if result[1]:
-                response = jsonify({'status': 'created'})
-                response.headers.add('Location', url_for('notifications.notification_details', ident=result[1].uuid))
+            notification = result[1]
+            if notification:
+                response = jsonify({'status': 'created', 'ident': notification.uuid})
+                response.headers.add('Location', url_for('notifications.notification_details', ident=notification.uuid))
                 response.status_code = 201
                 return response
             else:

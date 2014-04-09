@@ -45,7 +45,12 @@ Endpoint to create and retrieve notifications
     .. sourcecode:: http
 
         HTTP/1.1 201 Created
-        Location: /notifications/{uuid}
+        Location: /notifications/774aaaa5-d45b-4687-b7fb-d59aae606eb9
+
+        {
+          "ident": "774aaaa5-d45b-4687-b7fb-d59aae606eb9",
+          "status": "created"
+        }
 
     :jsonparam string message: the message of the notification
     :jsonparam date timestamp: (optional) start date of the notification (defaults to current time)
