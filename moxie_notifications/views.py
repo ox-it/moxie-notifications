@@ -300,6 +300,6 @@ def _str_to_datetime(obj):
     try:
         return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S")
     except ValueError as e:
-        raise BadRequest("Wrong date value: {msg}".format(msg=e.message))
+        raise BadRequest("Incorrect date value: {msg}".format(msg=e.message))
     except TypeError as e:
-        raise BadRequest("Wrong date value: {msg}".format(msg=e.message))
+        raise BadRequest("Incorrect date value: {msg}".format(msg=e.message))
