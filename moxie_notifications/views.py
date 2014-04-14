@@ -184,11 +184,11 @@ class NotificationAddFollowUpView(AuthenticatedView):
             raise BadRequest("You must pass a JSON document with property 'message'")
         fu = FollowUp(message_json['message'])
         service.add_followup(notification, fu)
-        return True
+        return fu.id
 
     @accepts(JSON, HAL_JSON)
     def as_json(self, response):
-        return jsonify({'status': 'created'})
+        return jsonify({'status': 'created', 'id': response})
 
 
 class FollowUpDetailsView(AuthenticatedView):

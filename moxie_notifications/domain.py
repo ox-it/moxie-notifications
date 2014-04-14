@@ -63,6 +63,7 @@ class FollowUp(db.Model):
 
     def as_dict(self):
         values = {'message': self.message,
+                  'id': self.id,
                   'timestamp': self.timestamp.isoformat()}
         return values
 
