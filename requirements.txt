@@ -1,2 +1,2 @@
 gcm-client==0.1.4
-apns-client==0.1.8
+apns-clerk==0.1.1
