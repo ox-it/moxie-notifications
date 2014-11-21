@@ -1,7 +1,7 @@
 import logging
 
 from datetime import timedelta
-from apnsclient import Session, APNs, Message
+from apns_clerk import Session, APNs, Message
 
 from moxie.core.kv import kv_store
 from moxie_notifications.providers import NotificationsProvider
