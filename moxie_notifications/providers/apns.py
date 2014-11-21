@@ -24,22 +24,22 @@ class APNSProvider(NotificationsProvider):
         self.session = None
 
     def _feedback_connection(self):
-        return Session.new_connection(self.feedback_address,
+        return Session.new_connection(address=self.feedback_address,
                                       cert_file=self.cert_file)
 
-    def feedback_server(self, timeout=10):
+    def feedback_server(self):
         con = self._feedback_connection()
-        return APNs(con, tail_timeout=timeout)
+        return APNs(con)
 
     def _push_connection(self):
         if not self.session:
             self.session = Session()
-        return self.session.get_connection(self.push_address,
+        return self.session.get_connection(address=self.push_address,
                                            cert_file=self.cert_file)
 
-    def push_server(self, timeout=0.5):
+    def push_server(self):
         con = self._push_connection()
-        return APNs(con, tail_timeout=timeout)
+        return APNs(con)
 
     def handles(self, platform):
         if platform is iOS:
