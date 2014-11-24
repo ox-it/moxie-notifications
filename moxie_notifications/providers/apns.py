@@ -24,8 +24,8 @@ class APNSProvider(NotificationsProvider):
         self.session = None
 
     def _feedback_connection(self):
-        return Session.new_connection(address=self.feedback_address,
-                                      cert_file=self.cert_file)
+        return Session().new_connection(address=self.feedback_address,
+                                        cert_file=self.cert_file)
 
     def feedback_server(self):
         con = self._feedback_connection()
